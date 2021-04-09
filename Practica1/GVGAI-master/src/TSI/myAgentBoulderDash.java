@@ -1,10 +1,7 @@
 package TSI;
 
-import java.awt.Desktop.Action;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.Set;
 
@@ -23,8 +20,11 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	ArrayList<ArrayList<Casilla>> matrizNodos;
 	int indicePlan;
 	ArrayList<Path> pathDisponibles;
+	ArrayList<NodoGreedy> listaObjetivos;
+	Set<Integer> posObjetivos;
 	Pos2D portal;
 	Pos3D avatar;
+	int pathActivo;
 	
 	
 	// Varibles de control
@@ -35,57 +35,85 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	
 	public myAgentBoulderDash(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 
+		listaObjetivos = new ArrayList<NodoGreedy>();
+		posObjetivos = new HashSet<Integer>();
+		pathActivo = 0;
+		
 		//Calculamos el factor de escala entre mundos (pixeles -> grid)
         fescala = new Vector2d(stateObs.getWorldDimension().width / stateObs.getObservationGrid().length , 
         		stateObs.getWorldDimension().height / stateObs.getObservationGrid()[0].length);
 		
-        
-		// Variables de control
-		if(stateObs.getResourcesPositions() == null) {
-			// Obtener coordenadas del portal
-	        obtenerPortal(stateObs);
-			gemasEncontradas = true;
-			numGemasEncontradas = 0;
-			numGemasNecesarias = 0;
-			nivel = 1;
-		}
-		else {
-			gemasEncontradas = false;
-			numGemasEncontradas = 0;
-			numGemasNecesarias = 9;
-			marcarGemas(stateObs);
-			nivel = 2;
-		}
-		
-		
-        // Creación de la matriz de nodos
-        int tamMapaX = stateObs.getObservationGrid().length;
-        int tamMapaY = stateObs.getObservationGrid()[0].length;
-        
-        matrizNodos = new ArrayList<ArrayList<Casilla>>();
-        for(int x = 0; x < tamMapaX; ++x) {
-        	matrizNodos.add(new ArrayList<Casilla>());
-        	for(int y = 0; y < tamMapaY; ++y) {
-        		matrizNodos.get(x).add(new Casilla(x,y));
-        	}
-        }
-        
-        // Marcar los obstaculos en el tablero
-        marcarObstaculos(stateObs);
-        
         // Obtener posición del avatar
         obtenerAvatar(stateObs);
+		
+		// Creación de la matriz de nodos
+		crearTablero(stateObs);
+		
+		// Marcar los obstaculos en el tablero
+		marcarObstaculos(stateObs);
+        
+        
+		// Variables de control
+        Boolean hayGemas, hayEnemigos;
+        
+        if(stateObs.getResourcesPositions() == null) { hayGemas = false; }
+        else { hayGemas = true; }
+        
+        if(stateObs.getNPCPositions() == null) { hayEnemigos = false; }
+        else { hayEnemigos = true; }
+        
+		if(!hayGemas) {
+			if(!hayEnemigos) {
+				numGemasEncontradas = 0;
+				numGemasNecesarias = 0;
+				nivel = 1;
+			}
+			else {
+				numGemasEncontradas = 0;
+				numGemasNecesarias = 0;
+				nivel = 3;
+			}
+		}
+		else {
+			if(!hayEnemigos) {
+				gemasEncontradas = false;
+				numGemasEncontradas = 0;
+				numGemasNecesarias = 9;
+				marcarGemas(stateObs);
+				nivel = 2;
+			}
+			else {
+				gemasEncontradas = false;
+				numGemasEncontradas = 0;
+				numGemasNecesarias = 9;
+				marcarGemas(stateObs);
+				nivel = 5;
+			}
+		}
+		
+		
+		// Obtener coordenadas del portal
+		obtenerPortal(stateObs);
         
         pathDisponibles = new ArrayList<Path>();
         
         // Cálculos de cada nivel
         switch (nivel) {
 		case 1:
-			Pos3D posOrigen = new Pos3D(avatar);
-			Pos3D posDestino = new Pos3D(portal, 0);
-			Path ruta = (Path)pathfinding_A_star(posOrigen, posDestino).get("path");
-			pathDisponibles.add(ruta);
-		break;
+			pathDisponibles.add(pathfinding_A_star(avatar, portal));
+			break;
+		case 2:
+			ArrayList<Pos2D> listaPosiciones = greedy_manhattan();
+			
+			Pos3D posOrigen;
+	        
+			posOrigen = new Pos3D(avatar);
+			
+			for(Pos2D objetivo : listaPosiciones) {
+				pathDisponibles.add(pathfinding_A_star(posOrigen, objetivo));
+				posOrigen = pathDisponibles.get(pathDisponibles.size()-1).posDestino;
+			}
+			break;
 		}
 	}
 	
@@ -111,11 +139,11 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		return accion;
 	}
 	
-	private int distanciaManhattan(Nodo current, Nodo destino) {
-		return Math.abs(current.pos.xy.x - destino.pos.xy.x) + Math.abs(current.pos.xy.y - destino.pos.xy.y);
+	private int distanciaManhattan(Pos2D current, Pos2D destino) {
+		return Math.abs(current.x - destino.x) + Math.abs(current.y - destino.y);
 	}
 	
-	private Map<String, Object> pathfinding_A_star(Pos3D posOrigen, Pos3D posDestino) {
+	private Path pathfinding_A_star(Pos3D posOrigen, Pos2D posDestino) {
 		PriorityQueue<Nodo> colaAbiertos = new PriorityQueue<Nodo>();
 		Set<Nodo> listaCerrados = new HashSet<Nodo>();
 		Set<Nodo> listaAbiertos = new HashSet<Nodo>();
@@ -125,7 +153,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		current.plan.clear();
 		current.plan.add(Types.ACTIONS.ACTION_NIL);
 		
-		Nodo destino = matrizNodos.get(posDestino.xy.x).get(posDestino.xy.y).orientacion.get(0);
+		//Nodo destino = matrizNodos.get(posDestino.xy.x).get(posDestino.xy.y).orientacion.get(0);
 		
 		colaAbiertos.offer(current);
 		listaAbiertos.add(current);
@@ -133,7 +161,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		int incre_g[] = new int[4];
 		int coste_h;
 		
-		while(!colaAbiertos.isEmpty() && !current.pos.xy.equals(destino.pos.xy)) {
+		while(!colaAbiertos.isEmpty() && !current.pos.xy.equals(posDestino)) {
 			
 			colaAbiertos.poll();
 			listaAbiertos.remove(current);
@@ -173,7 +201,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			if(!casillaUp.obstaculo) {
 				if(!listaCerrados.contains(hijoUp)) {
-					coste_h = distanciaManhattan(hijoUp, destino);
+					coste_h = distanciaManhattan(hijoUp.pos.xy, posDestino);
 					int new_coste_g = current.coste_g + incre_g[0];
 					if(listaAbiertos.contains(hijoUp)) {
 						if(new_coste_g < hijoUp.coste_g) {
@@ -210,7 +238,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			if(!casillaRight.obstaculo) {
 				if(!listaCerrados.contains(hijoRight)) {
-					coste_h = distanciaManhattan(hijoRight, destino);
+					coste_h = distanciaManhattan(hijoRight.pos.xy, posDestino);
 					int new_coste_g = current.coste_g + incre_g[1];
 					if(listaAbiertos.contains(hijoRight)) {
 						if(new_coste_g < hijoRight.coste_g) {
@@ -247,7 +275,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			if(!casillaDown.obstaculo) {
 				if(!listaCerrados.contains(hijoDown)) {
-					coste_h = distanciaManhattan(hijoDown, destino);
+					coste_h = distanciaManhattan(hijoDown.pos.xy, posDestino);
 					int new_coste_g = current.coste_g + incre_g[2];
 					if(listaAbiertos.contains(hijoDown)) {
 						if(new_coste_g < hijoDown.coste_g) {
@@ -284,7 +312,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			if(!casillaLeft.obstaculo) {
 				if(!listaCerrados.contains(hijoLeft)) {
-					coste_h = distanciaManhattan(hijoLeft, destino);
+					coste_h = distanciaManhattan(hijoLeft.pos.xy, posDestino);
 					int new_coste_g = current.coste_g + incre_g[3];
 					if(listaAbiertos.contains(hijoLeft)) {
 						if(new_coste_g < hijoLeft.coste_g) {
@@ -321,21 +349,83 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 		
 		
-		Path ruta = new Path(posOrigen, posDestino);
+		Path salida = null;
 
-		if(current.pos.xy.equals(destino.pos.xy)) {
+		if(current.pos.xy.equals(posDestino)) {
+			salida = new Path(posOrigen, current.pos);
+			
 			Nodo iter = current;
 			while(iter.plan.get(0) != ACTIONS.ACTION_NIL) {
 				for(ACTIONS accion : iter.plan) {
-					ruta.addAccionInicio(accion);
+					salida.addAccionInicio(accion);
 				}
 				iter = iter.padre;
 			}
 		}
 		
-		Map<String, Object> salida = new HashMap<String, Object>();
-		salida.put("path", ruta);
-		salida.put("posFinal", new Pos3D(current.pos));
+		return salida;
+	}
+	
+	ArrayList<Pos2D> greedy_manhattan() {
+		PriorityQueue<NodoGreedy> colaAbiertos = new PriorityQueue<NodoGreedy>();
+		
+		Integer current = 0;
+		NodoGreedy nodoCurrent = listaObjetivos.get(current);
+		nodoCurrent.gemasRestantes = new HashSet<Integer>(posObjetivos);
+		
+		int id_portal = listaObjetivos.get(listaObjetivos.size()-1).id;
+		nodoCurrent.gemasRestantes.remove(current);
+		nodoCurrent.gemasRestantes.remove(id_portal);
+		
+		colaAbiertos.offer(nodoCurrent);
+		
+		while(!colaAbiertos.isEmpty() && nodoCurrent.gemasEscogidas != numGemasNecesarias + 1) {
+			
+			colaAbiertos.poll();
+			
+			if(nodoCurrent.gemasEscogidas < numGemasNecesarias) {
+				for(Integer hijo : nodoCurrent.gemasRestantes) {
+					NodoGreedy nodoHijo = listaObjetivos.get(hijo);
+					
+					int new_coste = nodoCurrent.coste + distanciaManhattan(nodoCurrent.pos, nodoHijo.pos);
+					nodoHijo.padre = nodoCurrent;
+					nodoHijo.coste = new_coste;
+					nodoHijo.gemasEscogidas = nodoCurrent.gemasEscogidas + 1;
+					nodoHijo.gemasRestantes = new HashSet<Integer>(nodoCurrent.gemasRestantes);
+					nodoHijo.gemasRestantes.remove(hijo);
+					
+					colaAbiertos.offer(nodoHijo);
+				}
+			}
+			else if(nodoCurrent.gemasEscogidas == numGemasNecesarias) {
+				Integer hijo = id_portal;
+				NodoGreedy nodoHijo = listaObjetivos.get(hijo);
+				
+				int new_coste = nodoCurrent.coste + distanciaManhattan(nodoCurrent.pos, nodoHijo.pos);
+				nodoHijo.padre = nodoCurrent;
+				nodoHijo.coste = new_coste;
+				nodoHijo.gemasEscogidas = nodoCurrent.gemasEscogidas + 1;
+				nodoHijo.gemasRestantes = new HashSet<Integer>(nodoCurrent.gemasRestantes);
+				nodoHijo.gemasRestantes.remove(hijo);
+				
+				colaAbiertos.offer(nodoHijo);
+			}
+			
+			if(!colaAbiertos.isEmpty()) {
+				nodoCurrent = colaAbiertos.peek();
+				current = nodoCurrent.id;
+			}
+		}
+		
+		ArrayList<Pos2D> salida = new ArrayList<Pos2D>();
+
+		if(nodoCurrent.gemasEscogidas == numGemasNecesarias + 1) {
+			NodoGreedy iter = nodoCurrent;
+			while(iter.padre != null) {
+				salida.add(0, iter.pos);
+				iter = iter.padre;
+			}
+		}
 		
 		return salida;
 	}
@@ -346,12 +436,21 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	}
 	
 	private Types.ACTIONS deliberativo_compuesto() {
-		return Types.ACTIONS.ACTION_NIL;
+		ACTIONS accion = pathDisponibles.get(pathActivo).siguienteAccion();
+		
+		if(accion == ACTIONS.ACTION_NIL) {
+			pathActivo = pathActivo + 1;
+			accion = pathDisponibles.get(pathActivo).siguienteAccion();
+		}
+		return accion;
 	}
 	
 	private void obtenerPortal(StateObservation stateObs) {
 		portal = new Pos2D((int)Math.floor(stateObs.getPortalsPositions()[0].get(0).position.x / fescala.x),
 				           (int)Math.floor(stateObs.getPortalsPositions()[0].get(0).position.y / fescala.y));
+		
+		posObjetivos.add(listaObjetivos.size());
+		listaObjetivos.add(new NodoGreedy(portal, listaObjetivos.size()));
 	}	
 	
 	private int obtenerOriAvatar(Pos2D pos) {
@@ -367,6 +466,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		avatar = new Pos3D((int)Math.floor(stateObs.getAvatarPosition().x / fescala.x), 
 						   (int)Math.floor(stateObs.getAvatarPosition().y / fescala.y),
 						   obtenerOriAvatar(new Pos2D(stateObs.getAvatarOrientation())));
+		
+		posObjetivos.add(listaObjetivos.size());
+		listaObjetivos.add(new NodoGreedy(avatar.xy, listaObjetivos.size()));
 	}
 	
 	private void marcarObstaculos(StateObservation stateObs) {
@@ -385,7 +487,24 @@ public class myAgentBoulderDash extends AbstractPlayer {
 				int x = (int)Math.floor(gema.position.x / fescala.x);
 	            int y = (int)Math.floor(gema.position.y / fescala.y);
 	            matrizNodos.get(x).get(y).setGema(true);
+	            
+	            posObjetivos.add(listaObjetivos.size());
+	            Pos2D aux = new Pos2D(x,y);
+	            listaObjetivos.add(new NodoGreedy(aux, listaObjetivos.size()));
 			}
 		}
+	}
+	
+	private void crearTablero(StateObservation stateObs) {
+		int tamMapaX = stateObs.getObservationGrid().length;
+        int tamMapaY = stateObs.getObservationGrid()[0].length;
+        
+        matrizNodos = new ArrayList<ArrayList<Casilla>>();
+        for(int x = 0; x < tamMapaX; ++x) {
+        	matrizNodos.add(new ArrayList<Casilla>());
+        	for(int y = 0; y < tamMapaY; ++y) {
+        		matrizNodos.get(x).add(new Casilla(x,y));
+        	}
+        }
 	}
 }

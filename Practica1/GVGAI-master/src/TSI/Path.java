@@ -36,7 +36,7 @@ public class Path implements Comparable<Path> {
         if (getClass() != obj.getClass()) { return false; }
         final Path other = (Path) obj;
         if (!this.posOrigen.equals(other.posOrigen)) { return false; }
-        if (!this.posDestino.xy.equals(other.posDestino.xy)) { return false; }
+        if (!this.posDestino.equals(other.posDestino)) { return false; }
         return true;
     }
 	

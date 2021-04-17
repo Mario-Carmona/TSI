@@ -34,10 +34,16 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	SortedSet<CasillaRango> listaRangoCasillas;
 	ArrayList<Pos2D> listaEnemigos;
 	ArrayList<Pos2D> listaObstaculos;
-	int tamZonaCalor;
+	int tamZonaCalorEne;
+	int fuerzaCalorEne;
+	int tamZonaCalorObs;
+	int fuerzaCalorObs;
+	int [][][] zonasEnemigas;
+	int [][] zonaObs;
 	Pos2D centroMapa;
 	int distanciaGreedy[][];
 	Set<NodoGreedy> listaObjetivos;
+	Set<Pos2D> listaGemas;
 	
 	
 	// Varibles de control
@@ -49,9 +55,12 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	Boolean irALugarSeguro;
 	Boolean enLugarSeguro;
 	
+	Boolean irAObjetivo;
+	
 	public myAgentBoulderDash(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 
 		listaObjetivos = new HashSet<NodoGreedy>();
+		listaGemas = new HashSet<Pos2D>();
 		pathActivo = 0;
 		
 		//Calculamos el factor de escala entre mundos (pixeles -> grid)
@@ -131,7 +140,12 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			numGemasNecesarias = 0;
 			
 			irALugarSeguro = false;
-			tamZonaCalor = 4;
+			tamZonaCalorEne = 5;
+			fuerzaCalorEne = 5;
+			tamZonaCalorObs = 2;
+			fuerzaCalorObs = 4;
+			zonasEnemigas = new int[listaEnemigos.size()][2*tamZonaCalorEne - 1][2*tamZonaCalorEne - 1];
+			zonaObs = new int[2*tamZonaCalorObs - 1][2*tamZonaCalorObs - 1];
 			
 			// Obtener posición del avatar
 	        obtenerAvatar(stateObs);
@@ -144,7 +158,13 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			numGemasEncontradas = 0;
 			numGemasNecesarias = 9;
 			
-			tamZonaCalor = 4;
+			irAObjetivo = false;
+			tamZonaCalorEne = 5;
+			fuerzaCalorEne = 5;
+			tamZonaCalorObs = 2;
+			fuerzaCalorObs = 4;
+			zonasEnemigas = new int[listaEnemigos.size()][2*tamZonaCalorEne - 1][2*tamZonaCalorEne - 1];
+			zonaObs = new int[2*tamZonaCalorObs - 1][2*tamZonaCalorObs - 1];
 			
 			// Obtener posición del avatar
 	        obtenerAvatar(stateObs);
@@ -167,7 +187,6 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		
 		Types.ACTIONS accion = Types.ACTIONS.ACTION_NIL;
 		
-		// Actualizar posición del avatar
 		obtenerAvatar(stateObs);
 		
 		// Comprobar si hemos cogido una gema
@@ -175,6 +194,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			// Eliminamos la gema del tablero, para evitar que sea contada
 			// más veces al pasar por ella
 			matrizNodos.get(avatar.xy.x).get(avatar.xy.y).gema = false;
+			irAObjetivo = false;
 			++numGemasEncontradas;
 		}
 		
@@ -194,7 +214,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			accion = reactivo(stateObs);
 			break;
 		case REACTIVO_DELIB:
-			
+			accion = reactivo_deliberativo(stateObs);
 			break;
 		}
 		
@@ -558,6 +578,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	            matrizNodos.get(x).get(y).setGema(true);
 	            
 	            listaObjetivos.add(new NodoGreedy(new Pos2D(x,y), listaObjetivos.size()));
+	            listaGemas.add(new Pos2D(x,y));
 			}
 		}
 	}
@@ -616,6 +637,33 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		return rangoMin;
 	}
 	
+	/*
+	private int[] obtenerObstaculosMasCercanos(Pos2D posicion) {
+		int[] rangoMin = new int[4];
+		int[] resultado = new int[4];
+		for(int i = 0; i < 4; ++i) {
+			rangoMin[i] = mapaCalor.size()+1;
+			resultado[i] = mapaCalor.size()+1;
+		}
+		
+		for(Pos2D obstaculo : listaObstaculos) {
+			obtenerRango(posicion, obstaculo, resultado);
+			
+			for(int i = 0; i < 4; ++i) {
+				if(resultado[i] < rangoMin[i]) {
+					rangoMin[i] = resultado[i];
+				}
+			}
+			
+			for(int i = 0; i < 4; ++i) {
+				resultado[i] = mapaCalor.size()+1;
+			}
+		}
+		
+		return rangoMin;
+	}
+	*/
+	
 	private void inicializarListaRangoCasilla(StateObservation stateObs) {
 		listaRangoCasillas = new TreeSet<CasillaRango>();
 		
@@ -652,45 +700,103 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	private void aplicarCalor(int pos_x, int pos_y, int x, int y, int tamZonaCalor, int fuerzaCalor, int[][] zona) {
+		
+		// Si el calor se transmite a un muro, el calor no pasa por él
+		if(zona[x][y] < fuerzaCalor && !matrizNodos.get(pos_x).get(pos_y).obstaculo) {
+			zona[x][y] = fuerzaCalor;
+			
+			if(tamZonaCalor > 1) {
+				// Arriba
+				aplicarCalor(pos_x, pos_y-1, x, y-1, tamZonaCalor-1, fuerzaCalor-1, zona);
+				// Derecha
+				aplicarCalor(pos_x+1, pos_y, x+1, y, tamZonaCalor-1, fuerzaCalor-1, zona);
+				// Abajo
+				aplicarCalor(pos_x, pos_y+1, x, y+1, tamZonaCalor-1, fuerzaCalor-1, zona);
+				// Izquierda
+				aplicarCalor(pos_x-1, pos_y, x-1, y, tamZonaCalor-1, fuerzaCalor-1, zona);
+			}
+		}
+	}
+	
 	private void aplicarZonaCalorObs(Pos2D centro) {
-		for(int x = -2; x < tamZonaCalor; ++x) {
-			for(int y = -(tamZonaCalor-Math.abs(x)-1); y < tamZonaCalor-Math.abs(x); ++y) {
-				int aux_x = centro.x+x;
-				int aux_y = centro.y+y;
-				if( (aux_x >= 0 && aux_x < mapaCalor.size()) && (aux_y >= 0 && aux_y < mapaCalor.get(0).size()) ) {
-					int valor_actual = mapaCalor.get(aux_x).get(aux_y).calorObstaculo;
-					int incre = tamZonaCalor - Math.abs(x) - Math.abs(y);
-					mapaCalor.get(aux_x).get(aux_y).calorObstaculo = valor_actual + incre;
+		// Crear zona de calor
+		for(int i = 0; i < zonaObs.length; ++i) {
+			for(int j = 0; j < zonaObs.length; ++j) {
+				zonaObs[i][j] = 0;
+			}
+		}
+		
+		// Fijar calor del centro
+		int x = tamZonaCalorObs-1;
+		int y = tamZonaCalorObs-1;
+		zonaObs[x][y] = fuerzaCalorObs;
+		
+		// Fijar calor de alrededor del centro mediante recursividad, se comprueba
+		// que no se sale de los límites porque algunos de los elementos evaluados
+		// son los muros del exterior del mapa
+		
+		// Arriba
+		if(centro.y-1 >= 0) {
+			aplicarCalor(centro.x, centro.y-1, x, y-1, tamZonaCalorObs-1, fuerzaCalorObs-1, zonaObs);
+		}
+		// Derecha
+		if(centro.x+1 < matrizNodos.size()) {
+			aplicarCalor(centro.x+1, centro.y, x+1, y, tamZonaCalorObs-1, fuerzaCalorObs-1, zonaObs);
+		}
+		// Abajo
+		if(centro.y+1 < matrizNodos.get(0).size()) {
+			aplicarCalor(centro.x, centro.y+1, x, y+1, tamZonaCalorObs-1, fuerzaCalorObs-1, zonaObs);
+		}
+		// Izquierda
+		if(centro.x-1 >= 0) {
+			aplicarCalor(centro.x-1, centro.y, x-1, y, tamZonaCalorObs-1, fuerzaCalorObs-1, zonaObs);
+		}
+		
+		// Aplicar el calor obtenido en el mapa de calor
+		for(int i = -(tamZonaCalorObs-1); i < tamZonaCalorObs; ++i) {
+			for(int j = -(tamZonaCalorObs-Math.abs(i)-1); j < tamZonaCalorObs-Math.abs(i); ++j) {
+				if(centro.x+i >= 0 && centro.x+i < mapaCalor.size() && centro.y+j >= 0 && centro.y+j < mapaCalor.get(0).size()) {
+					mapaCalor.get(centro.x+i).get(centro.y+j).calorObstaculo += zonaObs[x+i][y+j];
 				}
 			}
 		}
 	}
 	
 	private void aplicarZonaCalorEne(Pos2D centro, int id) {
-		for(int x = -2; x < tamZonaCalor; ++x) {
-			for(int y = -(tamZonaCalor-Math.abs(x)-1); y < tamZonaCalor-Math.abs(x); ++y) {
-				int aux_x = centro.x+x;
-				int aux_y = centro.y+y;
-				if( (aux_x >= 0 && aux_x < mapaCalor.size()) && (aux_y >= 0 && aux_y < mapaCalor.get(0).size()) ) {
-					int valor_actual = mapaCalor.get(aux_x).get(aux_y).calorEnemigos[id];
-					int incre = tamZonaCalor - Math.abs(x) - Math.abs(y);
-					mapaCalor.get(aux_x).get(aux_y).calorEnemigos[id] = valor_actual + incre;
-					mapaCalor.get(aux_x).get(aux_y).calorEnemigosTotal += incre;
+		// Crear zona de calor
+		for(int i = 0; i < zonasEnemigas[id].length; ++i) {
+			for(int j = 0; j < zonasEnemigas[id].length; ++j) {
+				zonasEnemigas[id][i][j] = 0;
+			}
+		}
+		
+		// Fijar calor de alrededor del centro mediante recursividad
+		int x = tamZonaCalorEne-1;
+		int y = tamZonaCalorEne-1;
+		aplicarCalor(centro.x, centro.y, x, y, tamZonaCalorEne, fuerzaCalorEne, zonasEnemigas[id]);
+		
+		// Aplicar el calor obtenido en el mapa de calor
+		for(int i = -(tamZonaCalorEne-1); i < tamZonaCalorEne; ++i) {
+			for(int j = -(tamZonaCalorEne-Math.abs(i)-1); j < tamZonaCalorEne-Math.abs(i); ++j) {
+				if(centro.x+i >= 0 && centro.x+i < mapaCalor.size() && centro.y+j >= 0 && centro.y+j < mapaCalor.get(0).size()) {
+					mapaCalor.get(centro.x+i).get(centro.y+j).calorEnemigos[id] += zonasEnemigas[id][x+i][y+j];
+					mapaCalor.get(centro.x+i).get(centro.y+j).calorEnemigosTotal += zonasEnemigas[id][x+i][y+j];
 				}
 			}
 		}
 	}
 	
 	private void desaplicarZonaCalorEne(Pos2D centro, int id) {
-		for(int x = -2; x < tamZonaCalor; ++x) {
-			for(int y = -(tamZonaCalor-Math.abs(x)-1); y < tamZonaCalor-Math.abs(x); ++y) {
-				int aux_x = centro.x+x;
-				int aux_y = centro.y+y;
-				if( (aux_x >= 0 && aux_x < mapaCalor.size()) && (aux_y >= 0 && aux_y < mapaCalor.get(0).size()) ) {
-					int valor_actual = mapaCalor.get(aux_x).get(aux_y).calorEnemigos[id];
-					int incre = tamZonaCalor - Math.abs(x) - Math.abs(y);
-					mapaCalor.get(aux_x).get(aux_y).calorEnemigos[id] = valor_actual - incre;
-					mapaCalor.get(aux_x).get(aux_y).calorEnemigosTotal -= incre;
+		int x = tamZonaCalorEne-1;
+		int y = tamZonaCalorEne-1;
+		
+		// Desaplicar el calor obtenido en el mapa de calor
+		for(int i = -(tamZonaCalorEne-1); i < tamZonaCalorEne; ++i) {
+			for(int j = -(tamZonaCalorEne-Math.abs(i)-1); j < tamZonaCalorEne-Math.abs(i); ++j) {
+				if(centro.x+i >= 0 && centro.x+i < mapaCalor.size() && centro.y+j >= 0 && centro.y+j < mapaCalor.get(0).size()) {
+					mapaCalor.get(centro.x+i).get(centro.y+j).calorEnemigos[id] -= zonasEnemigas[id][x+i][y+j];
+					mapaCalor.get(centro.x+i).get(centro.y+j).calorEnemigosTotal -= zonasEnemigas[id][x+i][y+j];
 				}
 			}
 		}
@@ -714,48 +820,50 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	private int obtenerCalorCercano(Pos2D posicion, int orientacion, Boolean calorTotal) {
 		int calorMax = -1;
 		
+		int oriContraria = (orientacion+2)%4;
+		
 		for(int i = 0; i < 4; ++i) {
-			if(orientacion != i) {
+			if(oriContraria != i) {
 				int calorObtenido = 0;
-				switch (orientacion) {
+				switch (i) {
 				case 0: // Arriba
-					if(avatar.xy.y-1 >= 0) {
+					if(posicion.y-1 >= 0) {
 						if(calorTotal) {
-							calorObtenido = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).obtenerCalorTotal();
+							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y-1).obtenerCalorTotal();
 						}
 						else {
-							calorObtenido = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).calorEnemigosTotal;
+							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y-1).calorEnemigosTotal;
 						}
 						
 					}
 					break;
 				case 1: // Derecha
-					if(avatar.xy.x+1 < mapaCalor.size()) {
+					if(posicion.x+1 < mapaCalor.size()) {
 						if(calorTotal) {
-							calorObtenido = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).obtenerCalorTotal();
+							calorObtenido = mapaCalor.get(posicion.x+1).get(posicion.y).obtenerCalorTotal();
 						}
 						else {
-							calorObtenido = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).calorEnemigosTotal;
+							calorObtenido = mapaCalor.get(posicion.x+1).get(posicion.y).calorEnemigosTotal;
 						}
 					}
 					break;
 				case 2: // Abajo
-					if(avatar.xy.y+1 < mapaCalor.get(0).size()) {
+					if(posicion.y+1 < mapaCalor.get(0).size()) {
 						if(calorTotal) {
-							calorObtenido = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).obtenerCalorTotal();
+							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y+1).obtenerCalorTotal();
 						}
 						else {
-							calorObtenido = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).calorEnemigosTotal;
+							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y+1).calorEnemigosTotal;
 						}
 					}
 					break;
 				case 3: // Izquierda
-					if(avatar.xy.x-1 >= 0) {
+					if(posicion.x-1 >= 0) {
 						if(calorTotal) {
-							calorObtenido = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).obtenerCalorTotal();
+							calorObtenido = mapaCalor.get(posicion.x-1).get(posicion.y).obtenerCalorTotal();
 						}
 						else {
-							calorObtenido = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).calorEnemigosTotal;
+							calorObtenido = mapaCalor.get(posicion.x-1).get(posicion.y).calorEnemigosTotal;
 						}
 					}
 					break;
@@ -913,7 +1021,6 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	}
 	
 	private Types.ACTIONS reactivo(StateObservation stateObs) {
-		obtenerAvatar(stateObs);
 		actualizarEnemigos(stateObs);
 		
 		// Comprobar situación alrededor del avatar
@@ -1066,6 +1173,82 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			for(NodoGreedy objetivo2 : listaObjetivos) {
 				distanciaGreedy[objetivo1.id][objetivo2.id] = distanciaManhattan(objetivo1.pos, objetivo2.pos);
 			}
+		}
+	}
+	
+	private void obtenerMejorPlanGema() {
+		Iterator<Pos2D> iter = listaGemas.iterator();
+		
+		Pos2D elegido = null;
+		int distancia = 4*matrizNodos.size();
+		
+		for(Pos2D pos : listaGemas) {
+			if(matrizNodos.get(pos.x).get(pos.y).gema) {
+				int distanciaAux = distanciaManhattan(avatar.xy, pos);
+				
+				if(distanciaAux < distancia) {
+					distancia = distanciaAux;
+					elegido = pos;
+				}
+			}
+		}
+		
+		pathDisponibles.add(pathfinding_A_star(avatar, elegido));
+		pathActivo = 0;
+	}
+	
+	private Types.ACTIONS reactivo_deliberativo(StateObservation stateObs) {
+
+		actualizarEnemigos(stateObs);
+		
+		// Comprobar situación alrededor del avatar
+		Object[] resultado = comprobarPerimetro();
+		
+		Boolean sinPeligro = (Boolean)resultado[0];
+		
+		if(sinPeligro) {
+			if(!irAObjetivo) {
+				pathDisponibles.clear();
+				if(!gemasEncontradas) {
+					obtenerMejorPlanGema();
+				}
+				else {
+					pathDisponibles.add(pathfinding_A_star(avatar, portal));
+					pathActivo = 0;
+				}
+				
+				irAObjetivo = true;
+				
+				return pathDisponibles.get(pathActivo).siguienteAccion();
+			}
+			else {
+				return pathDisponibles.get(pathActivo).siguienteAccion();
+			}
+		}
+		else {
+			irAObjetivo = false;
+			
+			ACTIONS accion;
+			
+			switch ((int)resultado[1]) {
+			case 0: // Arriba
+				accion = ACTIONS.ACTION_UP;
+				break;
+			case 1: // Derecha
+				accion = ACTIONS.ACTION_RIGHT;
+				break;
+			case 2: // Abajo
+				accion = ACTIONS.ACTION_DOWN;
+				break;
+			case 3: // Izquierda
+				accion = ACTIONS.ACTION_LEFT;
+				break;
+			default:
+				accion = ACTIONS.ACTION_NIL;
+				break;
+			}
+			
+			return accion;
 		}
 	}
 }

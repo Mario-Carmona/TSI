@@ -4,9 +4,14 @@ import java.util.ArrayList;
 
 import ontology.Types;
 
+/*
+ * Representa una orientación de una casilla del mapa
+ */
 public class Nodo implements Comparable<Nodo> {
 	
+	// Posición de la casilla más orientación
 	Pos3D pos;
+	// Acción calculada en el A*
 	ArrayList<Types.ACTIONS> plan;
 	int coste_g;
 	int coste_f;

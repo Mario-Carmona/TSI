@@ -855,56 +855,44 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	
 	private Object[] comprobarPerimetro() {
 		
-		int [][] calorTotal = new int[4][2];
-		int [][] calorEnemigo = new int[4][2];
+		int [] calorTotal = new int[4];
+		int [] calorEnemigo = new int[4];
 		
 		for(int i = 0; i < 4; ++i) {
 			switch (i) {
 			case 0: // Arriba
-				calorTotal[i][0] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).obtenerCalorTotal();
-				calorTotal[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x, avatar.xy.y-1), i, true);
+				calorTotal[i] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).obtenerCalorTotal();
 				
-				calorEnemigo[i][0] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).calorEnemigosTotal;
-				calorEnemigo[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x, avatar.xy.y-1), i, false);
+				calorEnemigo[i] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).calorEnemigosTotal;
 				break;
 			case 1: // Derecha
-				calorTotal[i][0] = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).obtenerCalorTotal();
-				calorTotal[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x+1, avatar.xy.y), i, true);
+				calorTotal[i] = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).obtenerCalorTotal();
 				
-				calorEnemigo[i][0] = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).calorEnemigosTotal;
-				calorEnemigo[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x+1, avatar.xy.y), i, false);
+				calorEnemigo[i] = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).calorEnemigosTotal;
 				break;
 			case 2: // Abajo
-				calorTotal[i][0] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).obtenerCalorTotal();
-				calorTotal[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x, avatar.xy.y+1), i, true);
+				calorTotal[i] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).obtenerCalorTotal();
 				
-				calorEnemigo[i][0] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).calorEnemigosTotal;
-				calorEnemigo[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x, avatar.xy.y+1), i, false);
+				calorEnemigo[i] = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).calorEnemigosTotal;
 				break;
 			case 3: // Izquierda
-				calorTotal[i][0] = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).obtenerCalorTotal();
-				calorTotal[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x-1, avatar.xy.y), i, true);
+				calorTotal[i] = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).obtenerCalorTotal();
 				
-				calorEnemigo[i][0] = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).calorEnemigosTotal;
-				calorEnemigo[i][1] = obtenerCalorCercano(new Pos2D(avatar.xy.x-1, avatar.xy.y), i, false);
+				calorEnemigo[i] = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).calorEnemigosTotal;
 				break;
 			}
 			
 			if(i != avatar.ori) {
-				++calorTotal[i][0];
-				++calorTotal[i][1];
+				++calorTotal[i];
 			}
 		}
 		
 		// Si no hay peligro
-		
 		Boolean sinPeligro = true;
 		
 		for(int i = 0; i < 4 && sinPeligro; ++i) {
-			for(int j = 0; j < 2 && sinPeligro; ++j) {
-				if(calorEnemigo[i][j] != 0) {
-					sinPeligro = false;
-				}
+			if(calorEnemigo[i] != 0) {
+				sinPeligro = false;
 			}
 		}
 		
@@ -959,12 +947,12 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		ArrayList<Integer> elegidos = new ArrayList<Integer>();
 		
 		for(int i = 0; i < 4; ++i) {
-			if(calorTotal[i][0] < calorMin) {
-				calorMin = calorTotal[i][0];
+			if(calorTotal[i] < calorMin) {
+				calorMin = calorTotal[i];
 				elegidos.clear();
 			}
 			
-			if(calorTotal[i][0] == calorMin) {
+			if(calorTotal[i] == calorMin) {
 				elegidos.add(i);
 			}
 		}
@@ -979,98 +967,101 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		case 2: // Huye a la dirección contraria de la que tiene más peligro cercano
 		case 3:
 		case 4:
-			int calorMax = -1;
-			int calorCercanoMax = -1;
-			int elegido = -1;
+			int enemigoMasCercano = -1;
+			int distancia = 3*matrizNodos.size();
 			
-			for(int i : elegidos) {
-				int contrario = (i+2)%4;
-				if(calorTotal[contrario][0] > calorMax) {
-					calorMax = calorTotal[contrario][0];
-					calorCercanoMax = calorTotal[contrario][1];
-					elegido = i;
+			for(int i = 0; i < listaEnemigos.size(); ++i) {
+				int distanciaAux = distanciaManhattan(listaEnemigos.get(i), avatar.xy);
+				if(distanciaAux < distancia) {
+					distancia = distanciaAux;
+					enemigoMasCercano = i;
 				}
-				else if(calorTotal[contrario][0] == calorMax && calorTotal[contrario][1] > calorCercanoMax) {
-					calorCercanoMax = calorTotal[contrario][1];
-					elegido = i;
-				}
+				else if(distanciaAux == distancia) {
+					enemigoMasCercano = -1;
+ 				}
 			}
 			
-			salida[1] = elegido;
+			if(enemigoMasCercano == -1) {
+				int distObsMasCercano = 3*matrizNodos.size();
+				int elegido = -1;
+				
+				for(int ori : elegidos) {
+					Boolean terminar = false;
+					int j = 2;
+					int distanciaAux = 0;
+					
+					while(!terminar) {
+						switch (ori) {
+						case 0:
+							if(matrizNodos.get(avatar.xy.x).get(avatar.xy.y-j).obstaculo) {
+								terminar = true;
+								distanciaAux = j;
+							}
+							break;
+						case 1:
+							if(matrizNodos.get(avatar.xy.x+j).get(avatar.xy.y).obstaculo) {
+								terminar = true;
+								distanciaAux = j;
+							}
+							break;
+						case 2:
+							if(matrizNodos.get(avatar.xy.x).get(avatar.xy.y+j).obstaculo) {
+								terminar = true;
+								distanciaAux = j;
+							}		
+							break;
+						case 3:
+							if(matrizNodos.get(avatar.xy.x-j).get(avatar.xy.y).obstaculo) {
+								terminar = true;
+								distanciaAux = j;
+							}
+							break;
+						}
+						
+						++j;
+					}
+					
+					if(distanciaAux > distObsMasCercano) {
+						distObsMasCercano = distanciaAux;
+						elegido = ori;
+					}
+				}
+				
+				salida[1] = elegido;
+			}
+			else {
+				int elegido = -1;
+				calorMin = 2*fuerzaCalorEne;
+				
+				for(int i : elegidos) {
+					int calor = 0;
+					switch (i) {
+					case 0:
+						calor = mapaCalor.get(avatar.xy.x).get(avatar.xy.y-1).calorEnemigos[enemigoMasCercano];
+						break;
+					case 1:
+						calor = mapaCalor.get(avatar.xy.x+1).get(avatar.xy.y).calorEnemigos[enemigoMasCercano];
+						break;
+					case 2:
+						calor = mapaCalor.get(avatar.xy.x).get(avatar.xy.y+1).calorEnemigos[enemigoMasCercano];				
+						break;
+					case 3:
+						calor = mapaCalor.get(avatar.xy.x-1).get(avatar.xy.y).calorEnemigos[enemigoMasCercano];
+						break;
+					}
+					
+					if(calor < calorMin) {
+						calorMin = calor;
+						elegido = i;
+					}
+				}
+				
+				salida[1] = elegido;
+			}
 			break;
 		}
 		
 		return salida;
-	}
-	
-	private int obtenerCalorCercano(Pos2D posicion, int orientacion, Boolean calorTotal) {
-		int calorMax = -1;
-		
-		int oriContraria = (orientacion+2)%4;
-		
-		for(int i = 0; i < 4; ++i) {
-			if(oriContraria != i) {
-				int calorObtenido = 0;
-				switch (i) {
-				case 0: // Arriba
-					if(posicion.y-1 >= 0) {
-						if(calorTotal) {
-							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y-1).obtenerCalorTotal();
-						}
-						else {
-							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y-1).calorEnemigosTotal;
-						}
-						
-					}
-					break;
-				case 1: // Derecha
-					if(posicion.x+1 < mapaCalor.size()) {
-						if(calorTotal) {
-							calorObtenido = mapaCalor.get(posicion.x+1).get(posicion.y).obtenerCalorTotal();
-						}
-						else {
-							calorObtenido = mapaCalor.get(posicion.x+1).get(posicion.y).calorEnemigosTotal;
-						}
-					}
-					break;
-				case 2: // Abajo
-					if(posicion.y+1 < mapaCalor.get(0).size()) {
-						if(calorTotal) {
-							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y+1).obtenerCalorTotal();
-						}
-						else {
-							calorObtenido = mapaCalor.get(posicion.x).get(posicion.y+1).calorEnemigosTotal;
-						}
-					}
-					break;
-				case 3: // Izquierda
-					if(posicion.x-1 >= 0) {
-						if(calorTotal) {
-							calorObtenido = mapaCalor.get(posicion.x-1).get(posicion.y).obtenerCalorTotal();
-						}
-						else {
-							calorObtenido = mapaCalor.get(posicion.x-1).get(posicion.y).calorEnemigosTotal;
-						}
-					}
-					break;
-				}
-				
-				if(calorMax < calorObtenido) {
-					calorMax = calorObtenido;
-				}
-			}
-		}
-		
-		// Se incrementa en una unidad si la dirección no es igual a la
-		// orientación del avatar, para favorecer a la dirección que sigue
-		// el avatar
-		/*
-		if(orientacion != avatar.ori) {
-			++calorMax;
-		}
-		*/
-		
-		return calorMax;
 	}
 	
 	private Pos2D seleccionarMejorPos() {

@@ -35,7 +35,7 @@ public class Test {
 
 		// Game and level to play
 		int gameIdx = 11;
-		int levelIdx = 14; // level names from 0 to 4 (game_lvlN.txt).
+		int levelIdx = 13; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
 		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
@@ -51,15 +51,16 @@ public class Test {
 		// 2. This plays a game in a level by the controller.
 		
 		String controlador = "TSI.myAgentBoulderDash";
-
-		ArcadeMachine.runOneGame(game, level1, visuals, controlador, recordActionsFile, seed, 0);
-
+		
 		/*
+		ArcadeMachine.runOneGame(game, level1, visuals, controlador, recordActionsFile, seed, 0);
+		*/
+
 		// SCRIPT CUSTOM
 	    int victorias = 0;
 	    int derrotas = 0;
 	    int avg_timesteps = 0;
-	    int iteraciones = 100;
+	    int iteraciones = 10;
 	    for (int i = 0; i < iteraciones; i++) {
 	      seed = new Random().nextInt();
 	      System.out.print(i + " ");
@@ -67,37 +68,30 @@ public class Test {
 
 	      avg_timesteps += a[2];
 	      
+	      /*
 	      // Para mapas de gemas/enemigos
 	      if (a[0] == 1) {
 	        victorias++;
 	      } else {
 	        derrotas++;
 	      }
-
-	      /*
+	      */
+	
 	      // Para mapas de solo enemigos
 	      if (a[2] == 2000) {
 	        victorias++;
 	      } else {
 	        derrotas++;
 	      }
-	      */
-
-	      /*
-	      // 0: victoria
-	      // 1: score
-	      // 2: timesteps
-	      for (int j = 0; j < a.length; j++) {
-	        System.out.println(j + ", " + a[j]);
-	      }*/
-		/*
+		
 	    }
 
 	    avg_timesteps /= iteraciones;
 
 	    System.out.println("Victorias = " + victorias);
 	    System.out.println("Derrotas = " + derrotas);
-	    System.out.println("Timesteps = " + avg_timesteps);*/
+	    System.out.println("Timesteps = " + avg_timesteps);
+
 
 		// 3. This replays a game from an action file previously recorded
 	//	 String readActionsFile = recordActionsFile;

@@ -13,8 +13,12 @@ public class Nodo implements Comparable<Nodo> {
 	Pos3D pos;
 	// Acción calculada en el A*
 	ArrayList<Types.ACTIONS> plan;
+	// Coste del camino hasta la casilla
 	int coste_g;
+	// Coste total del camino desde el origen al destino
+	// pasando por esta casilla
 	int coste_f;
+	// Puntero al padre en el A*
 	Nodo padre;
 	
 	public Nodo(int x, int y, int ori) {
@@ -35,7 +39,22 @@ public class Nodo implements Comparable<Nodo> {
 
 	@Override
 	public int compareTo(Nodo arg0) {
-		return this.coste_f - arg0.coste_f;
+		int diferencia = this.coste_f - arg0.coste_f;
+		if(diferencia == 0) {
+			if(this.pos.xy.x == arg0.pos.xy.x) {
+				if(this.pos.xy.y == arg0.pos.xy.y) {
+					diferencia = 0;
+				}
+				else {
+					diferencia = -1;
+				}
+			}
+			else {
+				diferencia = -1;
+			}
+			diferencia = -1; 
+		}
+		return diferencia;
 	}
 	
 	@Override

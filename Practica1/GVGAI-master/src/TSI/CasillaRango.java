@@ -1,9 +1,18 @@
 package TSI;
 
+/*
+ * Representa el rango de una casilla del mapa
+ */
 public class CasillaRango implements Comparable<CasillaRango> {
-
+	
+	// Posición de la casilla
 	Pos2D pos;
+	// Calor de la casilla
 	CasillaCalor casillaCalor;
+	// Indica a que distancia está el obstáculo más cercano
+	// para saber se que cantidad de casilla disponemos para
+	// movernos alrededor de esta casilla, es una estimación
+	// no tiene porque parecersa a la real
 	int rango;
 	
 	public CasillaRango(int rango, CasillaCalor casillaCalor, Pos2D pos) {
@@ -14,6 +23,9 @@ public class CasillaRango implements Comparable<CasillaRango> {
 	
 	@Override
 	public int compareTo(CasillaRango arg0) {
+		// Se orden teniendo primero las casillas sin presencia
+		// de calor de los enemigos, dentro de cada grupo se ordena
+		// de mayor a menor rango.
 		if(this.casillaCalor.calorEnemigosTotal != 0 &&
 		   arg0.casillaCalor.calorEnemigosTotal == 0) {
 			return 1;

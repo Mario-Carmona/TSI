@@ -20,24 +20,25 @@ import tools.Vector2d;
 public class myAgentBoulderDash extends AbstractPlayer {
 
 	// Representación del mapa
+	
 	/*
-	 * Vector que nos indica el paso de píxeles a grid
+	 * Vector2d que nos permite el paso de píxeles a grid
 	 */
 	Vector2d fescala;
 	/*
 	 * Matriz que representa el mapa como un grid, cada
-	 * elementos es un objeto Casilla
+	 * elemento es un objeto Casilla
 	 */
 	ArrayList<ArrayList<Casilla>> matrizNodos;
 	
 	// Planes
+	
 	/*
-	 * Lista de los planes que el avatar tiene que realiza,
-	 * o tiene pendientes de realizar
+	 * Lista de los planes que el avatar tiene que realizar
 	 */
 	ArrayList<Path> pathDisponibles;
 	/*
-	 * Variables que indica el índice del plan que se
+	 * Variable que indica el índice del plan que se
 	 * está ejecutando es este momento de entre los 
 	 * elementos de la lista "pathDisponibles"
 	 */
@@ -49,6 +50,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	int[][] distanciaGreedy;
 	
 	// Objetos del mapa
+	
 	/*
 	 * Posición del portal
 	 */
@@ -75,28 +77,78 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	Set<NodoGreedy> listaObjetivos;
 	
 	// Recursos para el reactivo
+	
+	/*
+	 * Matriz con el calor de cada casilla
+	 */
 	ArrayList<ArrayList<CasillaCalor>> mapaCalor;
+	/*
+	 * Lista con el rango de las distintas casillas del mapa
+	 */
 	SortedSet<CasillaRango> listaRangoCasillas;
 	
 		// Fuerza del calor y su dispersión
+	
+	/*
+	 * Fuerza: es el valor del calor en el centro del objeto
+	 * que produce el calor
+	 * 
+	 * Dispersión: es la cantidad de saltos entre casilla que se
+	 * pueden hacer antes de que el calor sea cero. En cada salto
+	 * el calor pierde una unidad de fuerza.
+	 */
+	
+	/*
+	 * Fuerza y dispersión del calor en los enemigos
+	 */
 	int tamZonaCalorEne;
 	int fuerzaCalorEne;
+	/*
+	 * Fuerza y dispersión del calor en los obstáculos
+	 */
 	int tamZonaCalorObs;
 	int fuerzaCalorObs;
 		
 		// Zonas
+	
+	/*
+	 * Zona de calor de los enemigos
+	 */
 	int [][][] zonasEnemigas;
+	/*
+	 * Zona de calor de los obstaculos
+	 */
 	int [][] zonaObs;
 	
 		// Variables de control
+	
+	/*
+	 * Indica si se está siguiendo un camino para ir
+	 * a un lugar seguro
+	 */
 	Boolean irALugarSeguro;
-	Boolean enLugarSeguro;
+	/*
+	 * Indica si se está siguiendo un camino para ir a un objetivo
+	 */
 	Boolean irAObjetivo;
 	
 	// Varibles de control generales
+	
+	/*
+	 * Indica el nivel del mapa
+	 */
 	Nivel nivel;
+	/*
+	 * Indica si han encontrado todas la gemas necesarias
+	 */
 	Boolean gemasEncontradas;
+	/*
+	 * Indica el número de gemas encontradas
+	 */
 	int numGemasEncontradas;
+	/*
+	 * Indica el número de gemas necesarias para ganar
+	 */
 	int numGemasNecesarias;
 	
 	
@@ -120,10 +172,11 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		
 		// Obtener posiciones de los obstaculos
 		obtenerObstaculos(stateObs);
+		
 		// Marcar los obstaculos en el tablero
 		marcarObstaculos();
         
-        
+   
 		// Obtener el nivel del mapa
         Boolean hayGemas, hayEnemigos;
         
@@ -152,6 +205,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			// Obtener posición del avatar
 	        obtenerAvatar(stateObs);
+	        
 	        // Obtener posición del portal
 			obtenerPortal(stateObs);
 			
@@ -165,18 +219,20 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			// Obtener posición del avatar
 	        obtenerAvatar(stateObs);
+	        
 	        // Obtener posición de las gemas y marcarlas en el mapa
 			marcarGemas(stateObs);
+			
 			// Obtener posición del portal
 			obtenerPortal(stateObs);
 			
-			// Calcular la distancia manhattan entre los objetivos
+			// Calcular la distancia manhattan entre los objetivos(gemas)
 			calcularDistanciaEntreObjetivos();
 			
 			// Obtener la ruta de objetivos
 			ArrayList<Pos2D> listaPosiciones = greedy_manhattan();
 			
-			// Obtener el plan para recorrer todos los objetivos
+			// Obtener los caminos para realizar la ruta de objetivos
 			Pos3D posOrigen = new Pos3D(avatar);
 			
 			for(Pos2D objetivo : listaPosiciones) {
@@ -191,18 +247,27 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			
 			irALugarSeguro = false;
 			
+			// Asignar fuerza y dispersión del calor
+			// a los enemigos y obstáculos
 			tamZonaCalorEne = 5;
 			fuerzaCalorEne = 5;
 			tamZonaCalorObs = 1;
 			fuerzaCalorObs = 10;
 			
+			// Crear las zonas de calor. Esto nos será útil para los enemigos,
+			// ya que en esta zona guardaremos la zona de calor de un enemigo
+			// y podremos usarla para desaplicar el calor de un enemigo al 
+			// moverse de casilla
 			zonasEnemigas = new int[listaEnemigos.size()][2*tamZonaCalorEne - 1][2*tamZonaCalorEne - 1];
 			zonaObs = new int[2*tamZonaCalorObs - 1][2*tamZonaCalorObs - 1];
 			
 			// Obtener posición del avatar
 	        obtenerAvatar(stateObs);
 			
+	        // Inicializar el mapa de calor
 			inicializarMapaCalor();
+			
+			// Inicializar la lista de rangos
 			inicializarListaRangoCasilla(stateObs);
 			break;
 		case REACTIVO_DELIB:
@@ -211,19 +276,31 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			numGemasNecesarias = 9;
 			
 			irAObjetivo = false;
+			
+			// Asignar fuerza y dispersión del calor
+						// a los enemigos y obstáculos
 			tamZonaCalorEne = 5;
 			fuerzaCalorEne = 5;
-			tamZonaCalorObs = 2;
-			fuerzaCalorObs = 4;
+			tamZonaCalorObs = 1;
+			fuerzaCalorObs = 10;
+			
+			// Crear las zonas de calor. Esto nos será útil para los enemigos,
+			// ya que en esta zona guardaremos la zona de calor de un enemigo
+			// y podremos usarla para desaplicar el calor de un enemigo al 
+			// moverse de casilla
 			zonasEnemigas = new int[listaEnemigos.size()][2*tamZonaCalorEne - 1][2*tamZonaCalorEne - 1];
 			zonaObs = new int[2*tamZonaCalorObs - 1][2*tamZonaCalorObs - 1];
 			
 			// Obtener posición del avatar
 	        obtenerAvatar(stateObs);
+	        
+	        // Obtener posición de las gemas y marcarlas en el mapa
 			marcarGemas(stateObs);
+			
 			// Obtener coordenadas del portal
 			obtenerPortal(stateObs);
 			
+			// Inicializar el mapa de calor
 			inicializarMapaCalor();
 			break;
 		}
@@ -234,6 +311,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		
 		Types.ACTIONS accion = Types.ACTIONS.ACTION_NIL;
 		
+		// Actualizamos la posición del avatar
 		obtenerAvatar(stateObs);
 		
 		// Comprobar si hemos cogido una gema
@@ -241,15 +319,21 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			// Eliminamos la gema del tablero, para evitar que sea contada
 			// más veces al pasar por ella
 			matrizNodos.get(avatar.xy.x).get(avatar.xy.y).gema = false;
+			
+			// Si se estaba yendo a un objetivo se indica que ya se ha
+			// llegado
 			irAObjetivo = false;
+			
+			// Aumentamos en uno las cantidad de gemas recogidas
 			++numGemasEncontradas;
 		}
 		
-		// Comprobar su ya he cogido todas las gemas necesarias
+		// Comprobar si ya he cogido todas las gemas necesarias
 		if(numGemasEncontradas == numGemasNecesarias) {
 			gemasEncontradas = true;
 		}
 		
+		// Realización de la estrategia adecuada para cada nivel
 		switch (nivel) {
 		case DELIB_SIMPLE:
 			accion = deliberativo_simple();
@@ -273,6 +357,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	/****  General                                                                          */
 	/****************************************************************************************/
 	
+	/*
+	 * Método para obtener la posiciones de los enemigos
+	 */
 	private void obtenerEnemigos(StateObservation stateObs) {
 		if(listaEnemigos == null) {
 			listaEnemigos = new ArrayList<Pos2D>();
@@ -291,6 +378,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para crear el tablero de nodos y el mapa de calor
+	 */
 	private void crearTablero(StateObservation stateObs) {
 		int tamMapaX = stateObs.getObservationGrid().length;
         int tamMapaY = stateObs.getObservationGrid()[0].length;
@@ -307,6 +397,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
         }
 	}
 	
+	/*
+	 * Método para obtener las posiciones de los obstáculos
+	 */
 	private void obtenerObstaculos(StateObservation stateObs) {
 		listaObstaculos = new ArrayList<Pos2D>();
 		for(ArrayList<Observation> resource: stateObs.getImmovablePositions()) {
@@ -317,12 +410,19 @@ public class myAgentBoulderDash extends AbstractPlayer {
         }
 	}
 	
+	/*
+	 * Método para marcar los obstaculos en la matriz de nodos
+	 */
 	private void marcarObstaculos() {
 		for(Pos2D obstaculo : listaObstaculos) {
             matrizNodos.get(obstaculo.x).get(obstaculo.y).setObstaculo(true);
 		}
 	}
 	
+	/*
+	 * Método para obtener las posiciones de las gemas, marcarlas en
+	 * la matriz de nodos y añadirlas a la lista de objetivos
+	 */
 	private void marcarGemas(StateObservation stateObs) {
 		for(ArrayList<Observation> resource : stateObs.getResourcesPositions()) {
 			for(Observation gema : resource) {
@@ -335,12 +435,18 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para obtener la posición del avatar
+	 */
 	private void obtenerAvatar(StateObservation stateObs) {
 		avatar = new Pos3D((int)Math.floor(stateObs.getAvatarPosition().x / fescala.x), 
 						   (int)Math.floor(stateObs.getAvatarPosition().y / fescala.y),
 						   obtenerOriAvatar(new Pos2D(stateObs.getAvatarOrientation())));
 	}
 	
+	/*
+	 * Método para obtener la orientación del avatar
+	 */
 	private int obtenerOriAvatar(Pos2D pos) {
 		if(pos.y == -1) { return 0; }	// Arriba
 		if(pos.x == 1) { return 1; }	// Derecha
@@ -350,14 +456,23 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		return -1;
 	}
 	
+	/*
+	 * Método para obtener la posición del portal
+	 */
 	private void obtenerPortal(StateObservation stateObs) {
 		portal = convertirPixelAGrid(stateObs.getPortalsPositions()[0].get(0));
 	}	
 	
+	/*
+	 * Método para obtener la distancia manhattan entre dos puntos
+	 */
 	private int distanciaManhattan(Pos2D current, Pos2D destino) {
 		return Math.abs(current.x - destino.x) + Math.abs(current.y - destino.y);
 	}
 	
+	/*
+	 * Método para convertir una posición en píxeles en una posición del grid
+	 */
 	private Pos2D convertirPixelAGrid(Observation observacion) {
 		return new Pos2D((int)Math.floor(observacion.position.x / fescala.x), 
 						 (int)Math.floor(observacion.position.y / fescala.y));
@@ -367,6 +482,10 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	/****  Deliberativo                                                                     */
 	/****************************************************************************************/
 	
+	/*
+	 * Método para generar un camino entre una posición origen y una posición destino mediante
+	 * el algoritmo A*
+	 */
 	private Path pathfinding_A_star(Pos3D posOrigen, Pos2D posDestino) {
 		PriorityQueue<Nodo> colaAbiertos = new PriorityQueue<Nodo>();
 		Set<Nodo> listaCerrados = new HashSet<Nodo>();
@@ -576,8 +695,13 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		if(current.pos.xy.equals(posDestino)) {
 			salida = new Path(posOrigen, current.pos);
 			
+			// Obtener lista de acciones para recorrer
+			// el camino
 			Nodo iter = current;
 			while(iter.plan.get(0) != ACTIONS.ACTION_NIL) {
+				// Este bucle for se hace porque según la orientación
+				// se debe realizar dos acciones para ir a ciertos nodos
+				
 				for(ACTIONS accion : iter.plan) {
 					salida.addAccionInicio(accion);
 				}
@@ -588,6 +712,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		return salida;
 	}
 	
+	/*
+	 * Método para calcular la distancia manhattan entre los distintos objetivos del mapa
+	 */
 	private void calcularDistanciaEntreObjetivos() {
 		distanciaGreedy = new int[listaObjetivos.size()][listaObjetivos.size()];
 		
@@ -598,6 +725,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para generar una ruta de objetivos medienta el algoritmo greedy
+	 */
 	private ArrayList<Pos2D> greedy_manhattan() {
 		int gemas = 0;
 		
@@ -609,6 +739,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		
 		Set<NodoGreedy> lista = new HashSet<NodoGreedy>(listaObjetivos);
 		
+		// Elegir la gema más cercana al avatar
 		for(NodoGreedy objetivo : lista) {
 			int distancia = distanciaManhattan(avatar.xy, objetivo.pos);
 			if(distancia < min) {
@@ -624,6 +755,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		nodoElegido = nodoMin.id;
 		lista.remove(nodoMin);
 		
+		// Elegir el resto de las gemas, eligiendo la más cercana a la anterior elegida
 		while(gemas < numGemasNecesarias) {
 			min = valor_max;
 			
@@ -642,37 +774,42 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			lista.remove(nodoMin);
 		}
 		
-		// Añadir el portal
+		// Añadir el portal a la ruta
 		salida.add(portal);
 		
 		return salida;
 	}
 	
 	private Types.ACTIONS deliberativo_simple() {
+		// Se devuelve la acción siguiente del camino para ir al portal
 		Types.ACTIONS accion = pathDisponibles.get(0).siguienteAccion();
 		return accion;
 	}
 	
 	private Types.ACTIONS deliberativo_compuesto() {
 		
+		// Se obtiene la siguiente acción en el camino
 		ACTIONS accion = pathDisponibles.get(pathActivo).siguienteAccion();
 		
+		// Si la acción indica que se ha llegado al final de camino
 		if(accion == ACTIONS.ACTION_NIL) {
+			// Se cambia al siguiente camino en la ruta de objetivos
 			pathActivo = pathActivo + 1;
 			
+			// Se obtiene la primera acción del plan
 			accion = pathDisponibles.get(pathActivo).siguienteAccion();
 		}
 		
 		if(gemasEncontradas) {
 			if(pathDisponibles.get(pathActivo).posDestino.xy != portal) {
 				// Si ya tengo todas las gemas y el camino actual no me lleva
-				// al portal, calculo un nuevo camino
-				
+				// al portal, calculo un nuevo camino que me lleve al portal
 				pathDisponibles.clear();
 				
 				pathDisponibles.add(pathfinding_A_star(avatar, portal));
 				pathActivo = 0;
 				
+				// Obtengo la primera acción del camino
 				accion = pathDisponibles.get(pathActivo).siguienteAccion();
 			}
 		}
@@ -685,18 +822,24 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	/****  Reactivo                                                                         */
 	/****************************************************************************************/
 	
+	/*
+	 * Método para inicializar el mapa de calor
+	 */
 	private void inicializarMapaCalor() {
-		// Obstaculos
+		// Aplicamos el calor de los obstáculos
 		for(Pos2D obstaculo : listaObstaculos) {
 			aplicarZonaCalorObs(obstaculo);
 		}
 		
-		// Enemigos
+		// Aplicamos el calor de los enemigos
 		for(int i = 0; i < listaEnemigos.size(); ++i) {
 			aplicarZonaCalorEne(listaEnemigos.get(i), i);
 		}
 	}
 	
+	/*
+	 * Método para inicializar la lista de rangos de las distintas casillas
+	 */
 	private void inicializarListaRangoCasilla(StateObservation stateObs) {
 		listaRangoCasillas = new TreeSet<CasillaRango>();
 		
@@ -714,11 +857,16 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para obtener el rango de una cierta posición
+	 */
 	private int obtenerObstaculoMasCercano(Pos2D posicion) {
 		int rangoMin = mapaCalor.size()+1;
 		
 		for(Pos2D obstaculo : listaObstaculos) {
+			// Obtengo el rango de un obstáculo
 			int nuevoRango = obtenerRango(posicion, obstaculo);
+			// Me quedo con el menor rango obtenido
 			if(nuevoRango < rangoMin) {
 				rangoMin = nuevoRango;
 			}
@@ -727,22 +875,29 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		return rangoMin;
 	}
 	
+	/*
+	 * Método para obtener el rango de una posición hacia un obstáculo
+	 */
 	private int obtenerRango(Pos2D posicion, Pos2D obstaculo) {
 		int diferenciaX = Math.abs(posicion.x - obstaculo.x);
 		int diferenciaY = Math.abs(posicion.y - obstaculo.y);
 		
+		// Devuelvo la diferencia más grande
 		return Math.max(diferenciaX, diferenciaY);
 	}
 	
+	/*
+	 * Método para aplicar la zona de calor de un obstáculo
+	 */
 	private void aplicarZonaCalorObs(Pos2D centro) {
-		// Crear zona de calor
+		// Inicializar la zona poniendo todas las casillas a 0
 		for(int i = 0; i < zonaObs.length; ++i) {
 			for(int j = 0; j < zonaObs.length; ++j) {
 				zonaObs[i][j] = 0;
 			}
 		}
 		
-		// Fijar calor del centro
+		// Fijar calor del centro de la zona
 		int x = tamZonaCalorObs-1;
 		int y = tamZonaCalorObs-1;
 		zonaObs[x][y] = fuerzaCalorObs;
@@ -750,7 +905,6 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		// Fijar calor de alrededor del centro mediante recursividad, se comprueba
 		// que no se sale de los límites porque algunos de los elementos evaluados
 		// son los muros del exterior del mapa
-		
 		if(tamZonaCalorObs > 1) {
 			// Arriba
 			if(centro.y-1 >= 0) {
@@ -770,7 +924,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			}
 		}
 		
-		// Aplicar el calor obtenido en el mapa de calor
+		// Aplicar el calor obtenido sumandolo al mapa de calor en las posiciones correspondientes
 		for(int i = -(tamZonaCalorObs-1); i < tamZonaCalorObs; ++i) {
 			for(int j = -(tamZonaCalorObs-Math.abs(i)-1); j < tamZonaCalorObs-Math.abs(i); ++j) {
 				if(centro.x+i >= 0 && centro.x+i < mapaCalor.size() && centro.y+j >= 0 && centro.y+j < mapaCalor.get(0).size()) {
@@ -780,20 +934,37 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para aplicar la zona de calor del enemigo con cierto identificador id
+	 * 
+	 * Ejemplo de zona de calor con fuerza igual a 5 y dispersión igual a 5, el
+	 * centro es donde está el cinco:
+	 * 
+	 *          1
+	 *        1 2 1
+	 *      1 2 3 2 1
+	 *    1 2 3 4 3 2 1
+	 *  1 2 3 4 5 4 3 2 1
+	 *    1 2 3 4 3 2 1
+	 *      1 2 3 2 1
+	 *        1 2 1
+	 *          1
+	 * 
+	 */
 	private void aplicarZonaCalorEne(Pos2D centro, int id) {
-		// Crear zona de calor
+		// Inicializar la zona poniendo todas las casillas a 0
 		for(int i = 0; i < zonasEnemigas[id].length; ++i) {
 			for(int j = 0; j < zonasEnemigas[id].length; ++j) {
 				zonasEnemigas[id][i][j] = 0;
 			}
 		}
 		
-		// Fijar calor de alrededor del centro mediante recursividad
+		// Fijar calor del centro de la zona mediante recursividad
 		int x = tamZonaCalorEne-1;
 		int y = tamZonaCalorEne-1;
 		aplicarCalor(centro.x, centro.y, x, y, tamZonaCalorEne, fuerzaCalorEne, zonasEnemigas[id]);
 		
-		// Aplicar el calor obtenido en el mapa de calor
+		// Aplicar el calor obtenido sumandolo al mapa de calor en las posiciones correspondientes
 		for(int i = -(tamZonaCalorEne-1); i < tamZonaCalorEne; ++i) {
 			for(int j = -(tamZonaCalorEne-Math.abs(i)-1); j < tamZonaCalorEne-Math.abs(i); ++j) {
 				if(centro.x+i >= 0 && centro.x+i < mapaCalor.size() && centro.y+j >= 0 && centro.y+j < mapaCalor.get(0).size()) {
@@ -804,11 +975,18 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para desaplicar la zona de calor del enemigo con cierto identificador id.
+	 * 
+	 * Para este método se usa la zona de ese enemigo que ha sido calculada en la acción
+	 * anterior, por lo que no hay que volver a calcularla.
+	 */
 	private void desaplicarZonaCalorEne(Pos2D centro, int id) {
+		// Se calcula la posición del centro de la zona
 		int x = tamZonaCalorEne-1;
 		int y = tamZonaCalorEne-1;
 		
-		// Desaplicar el calor obtenido en el mapa de calor
+		// Desaplicar el calor obtenido restandolo al mapa de calor en las posiciones correspondientes
 		for(int i = -(tamZonaCalorEne-1); i < tamZonaCalorEne; ++i) {
 			for(int j = -(tamZonaCalorEne-Math.abs(i)-1); j < tamZonaCalorEne-Math.abs(i); ++j) {
 				if(centro.x+i >= 0 && centro.x+i < mapaCalor.size() && centro.y+j >= 0 && centro.y+j < mapaCalor.get(0).size()) {
@@ -819,12 +997,21 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para calcular el calor de un objeto
+	 */
 	private void aplicarCalor(int pos_x, int pos_y, int x, int y, int tamZonaCalor, int fuerzaCalor, int[][] zona) {
 		
-		// Si el calor se transmite a un muro, el calor no pasa por él
+		// Si la posición del centro es un muro, no se asigna calor a esa zona.
+		//
+		// Y si el calor en esa zona ya es mayor que el calor que se quiere asignar
+		// no se aplica el calor
 		if(zona[x][y] < fuerzaCalor && !matrizNodos.get(pos_x).get(pos_y).obstaculo) {
+			// Se asigna calor a la posición central
 			zona[x][y] = fuerzaCalor;
 			
+			// Si quedan al menos dos movimientos de casilla se lanzan los descendientes de esta posición
+			// decrementando en una unidad la fuerza y dispersión del calor
 			if(tamZonaCalor > 1) {
 				// Arriba
 				aplicarCalor(pos_x, pos_y-1, x, y-1, tamZonaCalor-1, fuerzaCalor-1, zona);
@@ -838,6 +1025,10 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para actualizar las posiciones de los enemigos, así como
+	 * el calor que producen
+	 */
 	private void actualizarEnemigos(StateObservation stateObs) {
 		// Desaplicar zona de calor de las antiguas posiciones
 		for(int i = 0; i < listaEnemigos.size(); ++i) {
@@ -853,11 +1044,16 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para comprobar si hay peligro alrededor del avatar y
+	 * si hay peligro obtener el mejor movimiento para esquivarlo
+	 */
 	private Object[] comprobarPerimetro() {
 		
 		int [] calorTotal = new int[4];
 		int [] calorEnemigo = new int[4];
 		
+		// Obtener el calor de los enemigos y los obstáculos de cada orientación
 		for(int i = 0; i < 4; ++i) {
 			switch (i) {
 			case 0: // Arriba
@@ -882,20 +1078,25 @@ public class myAgentBoulderDash extends AbstractPlayer {
 				break;
 			}
 			
+			// Si la orientación es distinta a la orientación del avatar se incrementa el calor total
 			if(i != avatar.ori) {
 				++calorTotal[i];
 			}
 		}
 		
-		// Si no hay peligro
 		Boolean sinPeligro = true;
 		
+		// Comprobamos si alrededor, todas las posiciones tienen calor igual a cero
 		for(int i = 0; i < 4 && sinPeligro; ++i) {
 			if(calorEnemigo[i] != 0) {
 				sinPeligro = false;
 			}
 		}
 		
+		// Si a pesar de obtener que hay riesgo, si nos encontramos en el nivel
+		// reactivo deliberativo, hemos encontrado todas las gemas y tenemos el portal
+		// al lado sin enemigos encima, nos dirigimos a él, por lo que se indica que no hay
+		// peligro
 		if(gemasEncontradas && nivel == Nivel.REACTIVO_DELIB && !sinPeligro) {
 			if(distanciaManhattan(avatar.xy, portal) == 1) {
 				Boolean seguir = true;
@@ -935,6 +1136,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			}
 		}
 		
+		// Si no hay peligro se indica en la salida
 		if(sinPeligro) {
 			Object[] salida = new Object[1];
 			salida[0] = sinPeligro; // No hay peligro cercano
@@ -942,7 +1144,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 		
 		
-		
+		// Se eligen las posiciones de cada orientación con menor calor
 		int calorMin = mapaCalor.size();
 		ArrayList<Integer> elegidos = new ArrayList<Integer>();
 		
@@ -957,16 +1159,17 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			}
 		}
 		
-		
+		// Actuación según el número de orientaciones elegidas
 		Object[] salida = new Object[2];
 		salida[0] = sinPeligro; // Hay peligro cercano
 		switch (elegidos.size()) {
-		case 1: // Huye en la única dirección sin peligro
+		case 1: // Huye en la única dirección elegida
 			salida[1] = elegidos.get(0);
 			break;
-		case 2: // Huye a la dirección contraria de la que tiene más peligro cercano
+		case 2: // Huye a la dirección con menor calor del enemigo más cercano
 		case 3:
 		case 4:
+			// Calculamos cuál es el enemigo más cercano al avatar
 			int enemigoMasCercano = -1;
 			int distancia = 3*matrizNodos.size();
 			
@@ -977,11 +1180,17 @@ public class myAgentBoulderDash extends AbstractPlayer {
 					enemigoMasCercano = i;
 				}
 				else if(distanciaAux == distancia) {
+					// Si hay dos a la misma distancia se debe tener en cuenta
 					enemigoMasCercano = -1;
  				}
 			}
 			
+			// Si hay dos enemigos a la misma distancia
 			if(enemigoMasCercano == -1) {
+				// Obtenemos la distancia que hay entre el avatar y el obstáculo
+				// más cercano en esa dirección, y nos quedamos con la dirección
+				// que nos proporcione una mayor distancia, priorizando tener
+				// una mayor capacidad de huida
 				int distObsMasCercano = 3*matrizNodos.size();
 				int elegido = -1;
 				
@@ -990,6 +1199,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 					int j = 2;
 					int distanciaAux = 0;
 					
+					// Avance por la dirección de la iteración
 					while(!terminar) {
 						switch (ori) {
 						case 0:
@@ -1029,7 +1239,10 @@ public class myAgentBoulderDash extends AbstractPlayer {
 				
 				salida[1] = elegido;
 			}
-			else {
+			else { // Si hay un enemigo que está más cerca
+				
+				// Se calcula cuál es la dirección de entre las elegidas que tiene un menor calor de ese 
+				// enemigo, por lo que tratamos de alejarnos de él, al ser nuestro principal peligro.
 				int elegido = -1;
 				calorMin = 2*fuerzaCalorEne;
 				
@@ -1064,6 +1277,10 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		return salida;
 	}
 	
+	/*
+	 * Método para obtener la casilla con mayor rango que no tiene presencia
+	 * de calor de los enemigos y que está más cerca del avatar
+	 */
 	private Pos2D seleccionarMejorPos() {
 		Iterator<CasillaRango> iter = listaRangoCasillas.iterator();
 		int rango = listaRangoCasillas.first().rango;
@@ -1072,6 +1289,9 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		Boolean parar = false;
 		
 		iter.next();
+		// Se busca hasta que se encuentra un rango menor del que se tiene en rango,
+		// ya que están ordenados de mayor a menor rango. Se busca la casilla más 
+		// cercana al avatar
 		while(!parar) {
 			CasillaRango casilla = iter.next();
 			if(casilla.rango < rango) {
@@ -1089,31 +1309,49 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	}
 	
 	private Types.ACTIONS reactivo(StateObservation stateObs) {
+		// Actualizo la posición y el calor de los enemigos
 		actualizarEnemigos(stateObs);
 		
-		// Comprobar situación alrededor del avatar
+		// Compruebo si hay peligro alrededor del avatar, y si hay peligro
+		// nos devuelve la mejor posición para evitarlo
 		Object[] resultado = comprobarPerimetro();
 		
 		Boolean sinPeligro = (Boolean)resultado[0];
 		
+		// Si no hay peligro
 		if(sinPeligro) {
+			// Si no estamos siguiendo un camino que nos lleve a
+			// una casilla segura
 			if(!irALugarSeguro) {
+				// Obtengo la mejor casilla, que será la casilla con mayor
+				// rango que no tenga presencia de calor de enemigos
 				Pos2D mejorPos = seleccionarMejorPos();
 				
+				// Obtenemos el camino con destino a la casilla segura
 				pathDisponibles.clear();
 				pathDisponibles.add(pathfinding_A_star(avatar, mejorPos));
 				pathActivo = 0;
+				
+				// Se indica que se está siguiendo el camino
 				irALugarSeguro = true;
 				
+				// Obtenemos la primera acción del camino
 				return pathDisponibles.get(pathActivo).siguienteAccion();
 			}
 			else {
+				// Obtenemos la siguiente acción del camino. Si ya hemos llegado al objetivo
+				// no hay problema, ya que este método nos devuelve la acción nil cuando ya 
+				// hemos terminado el camino, lo que permite que el avatar se quede quieto 
+				// en la casilla segura
 				return pathDisponibles.get(pathActivo).siguienteAccion();
 			}
 		}
 		else {
+			// Se indica que se deja de ir a una casilla segura porque
+			// se ha detectado peligro
 			irALugarSeguro = false;
 			
+			// Realizamos la acción para evitar el peligro
 			ACTIONS accion;
 			
 			switch ((int)resultado[1]) {
@@ -1138,6 +1376,10 @@ public class myAgentBoulderDash extends AbstractPlayer {
 		}
 	}
 	
+	/*
+	 * Método para obtener la gema más cercana al avatar y que
+	 * no tiene presencia de calor de los enemigos
+	 */
 	private void obtenerMejorPlanGema() {
 		Pos2D elegido = null;
 		int distancia = 4*matrizNodos.size();
@@ -1172,36 +1414,53 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	}
 	
 	private Types.ACTIONS reactivo_deliberativo(StateObservation stateObs) {
-
+		// Actualizo la posición y el calor de los enemigos
 		actualizarEnemigos(stateObs);
 		
-		// Comprobar situación alrededor del avatar
+		// Compruebo si hay peligro alrededor del avatar, y si hay peligro
+		// nos devuelve la mejor posición para evitarlo
 		Object[] resultado = comprobarPerimetro();
 		
 		Boolean sinPeligro = (Boolean)resultado[0];
 		
+		// Si no hay peligro
 		if(sinPeligro) {
+			// Si no estamos siguiendo un camino que nos lleve a
+			// un objetivo
 			if(!irAObjetivo) {
+				// Eliminamos los caminos guardados
 				pathDisponibles.clear();
+				
+				// Si no he recogido las gemas necesarias
 				if(!gemasEncontradas) {
+					// Obtengo el mejor camino para ir a una gema
 					obtenerMejorPlanGema();
 				}
 				else {
+					// Obtengo el camino para ir al portal
 					pathDisponibles.add(pathfinding_A_star(avatar, portal));
 					pathActivo = 0;
 				}
 				
+				// Se indica que se está siguiendo el camino
 				irAObjetivo = true;
 				
+				// Obtenemos la primera acción del camino
 				return pathDisponibles.get(pathActivo).siguienteAccion();
 			}
 			else {
+				// Obtenemos la siguiente acción del camino. Si ya hemos llegado al objetivo
+				// no hay problema, ya que al coger la gema al inicio del método "act" indicamos
+				// que dejamos de seguir el camino al objetivo.
 				return pathDisponibles.get(pathActivo).siguienteAccion();
 			}
 		}
 		else {
+			// Se indica que se deja de ir al objetivo porque
+			// se ha detectado peligro
 			irAObjetivo = false;
 			
+			// Realizamos la acción para evitar el peligro
 			ACTIONS accion;
 			
 			switch ((int)resultado[1]) {

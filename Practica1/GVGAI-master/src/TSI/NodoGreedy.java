@@ -1,9 +1,15 @@
 package TSI;
 
-
+/*
+ * Representa un elemento del camino obtenido con
+ * algoritmo Greedy
+ */
 public class NodoGreedy implements Comparable<NodoGreedy> {
 	
+	// Identificados del elemento dentro de los objetivos
+	// que hay por el mapa
 	int id;
+	// Posición del elementos en el mapa
 	Pos2D pos;
 	
 	public NodoGreedy(int x, int y, int id) {

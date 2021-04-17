@@ -2,11 +2,19 @@ package TSI;
 
 import java.util.ArrayList;
 
+/*
+ * Representa una casilla del mapa
+ */
 public class Casilla {
 
+	// Posición de la casilla
 	Pos2D pos;
+	// Lista de nodos con las posibles orientaciones
+	// de la casilla
 	ArrayList<Nodo> orientacion;
+	// Indicador de obstaculo en la casilla
 	Boolean obstaculo;
+	// Indicar de gema en la casilla
 	Boolean gema;
 	
 	public Casilla(int x, int y) {

@@ -4,11 +4,18 @@ import java.util.ArrayList;
 
 import ontology.Types;
 
+/*
+ * Representa un camino desde un origen hasta un destino
+ */
 public class Path implements Comparable<Path> {
 	
+	// Posición de origen con su orientación
 	Pos3D posOrigen;
+	// posición de destino con su orientación
 	Pos3D posDestino;
+	// Lista de acciones para realizar el camino
 	ArrayList<Types.ACTIONS> acciones;
+	// Indicador de la acción a realizar en cada momento
 	int contador;
 	
 	public Path(Pos3D posOrigen, Pos3D posDestino) {
@@ -40,6 +47,10 @@ public class Path implements Comparable<Path> {
         return true;
     }
 	
+	/*
+	 * Método que devuelve la acción a realizar y aumenta el contador ó
+	 * si el contador ya ha llegado al final devuelve la acción nil
+	 */
 	public Types.ACTIONS siguienteAccion() {
 		
 		if(contador < acciones.size()) {
@@ -52,22 +63,16 @@ public class Path implements Comparable<Path> {
 		}
 	}
 	
-	public Pos3D getPosOrigen() {
-		return posOrigen;
-	}
-	
-	public Pos3D getPosDestino() {
-		return posDestino;
-	}
-	
-	public void setPath(ArrayList<Types.ACTIONS> newPath) {
-		acciones = newPath;
-	}
-	
+	/*
+	 * Añadir acción al inicio del camino
+	 */
 	public void addAccionInicio(Types.ACTIONS accion) {
 		acciones.add(0, accion);
 	}
 	
+	/*
+	 * Añadir acción al final del camino
+	 */
 	public void addAccionFin(Types.ACTIONS accion) {
 		acciones.add(acciones.size(), accion);
 	}

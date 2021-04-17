@@ -1,9 +1,15 @@
 package TSI;
 
+/*
+ * Representa el calor de un casilla
+ */
 public class CasillaCalor {
 	
+	// Calor producido por obstáculos
 	int calorObstaculo;
+	// Calor producido por cada enemigo
 	int [] calorEnemigos;
+	// Calor producido por todos los enemigos juntos
 	int calorEnemigosTotal;
 	
 	public CasillaCalor(int numEnemigos) {
@@ -15,6 +21,10 @@ public class CasillaCalor {
 		calorEnemigosTotal = 0;
 	}
 	
+	/*
+	 * Devuelve el calor total de la casilla, que es sumando
+	 * el calor de los obstáculos y los enemigos
+	 */
 	int obtenerCalorTotal() {
 		return calorObstaculo + calorEnemigosTotal;
 	}

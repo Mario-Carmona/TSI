@@ -1,8 +1,13 @@
 package TSI;
 
+/*
+ * Representa una posición en el mapa más su orientación
+ */
 public class Pos3D implements Comparable<Pos3D> {
 	
+	// Posición en el mapa
 	Pos2D xy;
+	// Orientación
 	int ori;
 	
 	public Pos3D() {

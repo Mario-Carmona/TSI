@@ -35,12 +35,12 @@ public class Test {
 
 		// Game and level to play
 		int gameIdx = 11;
-		int levelIdx = 13; // level names from 0 to 4 (game_lvlN.txt).
+		int levelIdx = 10; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
 		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
 
-		String recordActionsFile = null;// "actions_" + games[gameIdx] + "_lvl"
+		String recordActionsFile = "actions_" + games[gameIdx] + "_lvl" + levelIdx + "_" + seed + ".txt";// "actions_" + games[gameIdx] + "_lvl"
 						// + levelIdx + "_" + seed + ".txt";
 						// where to record the actions
 						// executed. null if not to save.
@@ -52,10 +52,9 @@ public class Test {
 		
 		String controlador = "TSI.myAgentBoulderDash";
 		
-		/*
 		ArcadeMachine.runOneGame(game, level1, visuals, controlador, recordActionsFile, seed, 0);
-		*/
 
+		/*
 		// SCRIPT CUSTOM
 	    int victorias = 0;
 	    int derrotas = 0;
@@ -76,7 +75,8 @@ public class Test {
 	        derrotas++;
 	      }
 	      */
-	
+		  
+		  /*
 	      // Para mapas de solo enemigos
 	      if (a[2] == 2000) {
 	        victorias++;
@@ -91,7 +91,7 @@ public class Test {
 	    System.out.println("Victorias = " + victorias);
 	    System.out.println("Derrotas = " + derrotas);
 	    System.out.println("Timesteps = " + avg_timesteps);
-
+		*/
 
 		// 3. This replays a game from an action file previously recorded
 	//	 String readActionsFile = recordActionsFile;

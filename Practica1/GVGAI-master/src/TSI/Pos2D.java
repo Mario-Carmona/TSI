@@ -2,9 +2,14 @@ package TSI;
 
 import tools.Vector2d;
 
+/*
+ * Representa una posición en el mapa
+ */
 public class Pos2D implements Comparable<Pos2D> {
 
+	// Valor del eje X
 	int x;
+	// Valor del eje Y
 	int y;
 	
 	public Pos2D() {

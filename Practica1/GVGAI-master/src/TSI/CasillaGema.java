@@ -1,8 +1,13 @@
 package TSI;
 
+/*
+ * Representa la casilla en la que está colocada una gema
+ */
 public class CasillaGema implements Comparable<CasillaGema> {
-
+	
+	// Posición de la casilla
 	Pos2D pos;
+	// Calor de la casilla
 	CasillaCalor casillaCalor;
 	
 	public CasillaGema(CasillaCalor casillaCalor, Pos2D pos) {

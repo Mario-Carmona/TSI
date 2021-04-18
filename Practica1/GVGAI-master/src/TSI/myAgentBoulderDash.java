@@ -949,6 +949,15 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	 *      1 2 3 2 1
 	 *        1 2 1
 	 *          1
+	 *          
+	 * Ejemplo de zona de calor con fuerza igual a 5 y dispersión igual a 3, el
+	 * centro es donde está el cinco:
+	 * 
+	 *      3
+	 *    3 4 3
+	 *  3 4 5 4 3
+	 *    3 4 3
+	 *      3
 	 * 
 	 */
 	private void aplicarZonaCalorEne(Pos2D centro, int id) {
@@ -1377,13 +1386,14 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	}
 	
 	/*
-	 * Método para obtener la gema más cercana al avatar y que
-	 * no tiene presencia de calor de los enemigos
+	 * Método para obtener la gema más cercana al avatar
 	 */
 	private void obtenerMejorPlanGema() {
 		Pos2D elegido = null;
 		int distancia = 4*matrizNodos.size();
 		
+		// Primero se busca la gemas más cercana que no tenga calor de
+		// los enemigos
 		for(CasillaGema gema : listaGemas) {
 			if(matrizNodos.get(gema.pos.x).get(gema.pos.y).gema &&
 			   gema.casillaCalor.calorEnemigosTotal == 0) {
@@ -1396,6 +1406,8 @@ public class myAgentBoulderDash extends AbstractPlayer {
 			}
 		}
 		
+		// Si no se encuentra una gemas sin calor de los enemigos, se
+		// quita esta restricción
 		if(elegido == null) {
 			for(CasillaGema gema : listaGemas) {
 				if(matrizNodos.get(gema.pos.x).get(gema.pos.y).gema) {

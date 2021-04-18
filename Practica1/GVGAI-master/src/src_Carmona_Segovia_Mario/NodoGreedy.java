@@ -1,4 +1,4 @@
-package TSI;
+package src_Carmona_Segovia_Mario;
 
 /*
  * Representa un elemento del camino obtenido con

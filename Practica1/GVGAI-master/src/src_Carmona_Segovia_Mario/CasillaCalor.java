@@ -1,4 +1,4 @@
-package TSI;
+package src_Carmona_Segovia_Mario;
 
 /*
  * Representa el calor de un casilla

@@ -1,4 +1,4 @@
-package TSI;
+package src_Carmona_Segovia_Mario;
 
 /*
  * Representa una posición en el mapa más su orientación

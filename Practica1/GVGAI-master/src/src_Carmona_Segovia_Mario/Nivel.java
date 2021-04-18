@@ -1,4 +1,4 @@
-package TSI;
+package src_Carmona_Segovia_Mario;
 
 /*
  * Enumarado que contiene los distintos niveles que puede tener un mapa

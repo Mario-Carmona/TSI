@@ -1,4 +1,4 @@
-package TSI;
+package src_Carmona_Segovia_Mario;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -17,7 +17,7 @@ import tools.ElapsedCpuTimer;
 import tools.Vector2d;
 
 
-public class myAgentBoulderDash extends AbstractPlayer {
+public class Agent extends AbstractPlayer {
 
 	// Representación del mapa
 	
@@ -153,7 +153,7 @@ public class myAgentBoulderDash extends AbstractPlayer {
 	
 	
 	
-	public myAgentBoulderDash(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
+	public Agent(StateObservation stateObs, ElapsedCpuTimer elapsedTimer) {
 
 		listaObjetivos = new HashSet<NodoGreedy>();
 		listaGemas = new HashSet<CasillaGema>();

@@ -35,7 +35,7 @@ public class Test {
 
 		// Game and level to play
 		int gameIdx = 11;
-		int levelIdx = 10; // level names from 0 to 4 (game_lvlN.txt).
+		int levelIdx = 14; // level names from 0 to 4 (game_lvlN.txt).
 		String gameName = games[gameIdx][1];
 		String game = games[gameIdx][0];
 		String level1 = game.replace(gameName, gameName + "_lvl" + levelIdx);
@@ -50,7 +50,7 @@ public class Test {
 
 		// 2. This plays a game in a level by the controller.
 		
-		String controlador = "TSI.myAgentBoulderDash";
+		String controlador = "src_Carmona_Segovia_Mario.Agent";
 		
 		ArcadeMachine.runOneGame(game, level1, visuals, controlador, recordActionsFile, seed, 0);
 

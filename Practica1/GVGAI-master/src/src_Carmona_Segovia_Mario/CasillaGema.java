@@ -1,4 +1,4 @@
-package TSI;
+package src_Carmona_Segovia_Mario;
 
 /*
  * Representa la casilla en la que está colocada una gema

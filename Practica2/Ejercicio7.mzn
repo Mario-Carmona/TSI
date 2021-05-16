@@ -7,7 +7,7 @@ include "globals.mzn";
   % Número de tareas
 int: numTareas = 12;
 
-  % Variables que indican que número identifica a cada tareas
+  % Variables que indican que número identifica a cada tarea
   % Se ha incluido la tarea Ninguna, que representa el inicio del proceso, además sirve para asignarla como predecesora para algunas asignaturas
 int: Ninguna = 1;
 int: A = 2;
@@ -44,7 +44,7 @@ array[1..numTareas,1..2] of int: predecesoras = [|Ninguna,Ninguna,
                                                  |I,J
                                                  |K,Ninguna|];
 
-  % Vector con la duración de cada tareas
+  % Vector con la duración de cada tarea
 array[1..(numTareas+1)] of int: duracion = [1,60,10,5,5,5,2,7,3,7,2,5,1];
 
   % Variable que contiene el tiempo mínimo para realizar por completo el proceso
@@ -53,7 +53,7 @@ var int: tiempoMinimo;
 
 % Definición de restricciones:
 
-  % Se indica que la tarea Ninguna empieza en el tiempo 0, para que cualquier tarea tenga un inicio posterior y no cause problemas como tarea predecesora
+  % Se indica que la tarea Ninguna empieza en el tiempo 0, para que cualquier tarea tenga un inicio posterior a esta tarea y no cause problemas con las comprobaciones de las tareas predecesoras
 constraint inicios[Ninguna] == 0;
 
   % Se comprueba que el inicio del resto de tareas es siempre mayor o igual a la finalización de todas las tareas predecesoras de la tarea que se está examinando

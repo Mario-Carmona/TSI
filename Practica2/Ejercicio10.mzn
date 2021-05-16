@@ -50,4 +50,4 @@ solve maximize sumaPreferencias;
 output ["Objetos = "] ++
        [if fix(elegidos[i])==1 then "\(nombres[i]) " else "" endif | i in numObjetos] ++
        [" |  Preferencias = ", show(sumaPreferencias)] ++
-       ["  |  PesoFinal = ", show(sumaPeso), " kgs"];
+       ["  |  PesoFinal = ", show(sumaPeso), " gramos"];

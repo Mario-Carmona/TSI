@@ -1,6 +1,6 @@
 ;Header and description
 
-(define (domain domain_name)
+(define (domain ejercicio1)
 
     ;remove requirements that are not needed
     (:requirements :strips :typing :adl)
@@ -55,6 +55,31 @@
         :effect 
             (and 
                 (extrayendo ?uni ?tipo)
+            )
+    )
+    
+    (:action crear_camino
+        :parameters (?x - localizacion ?y - localizacion ?z - localizacion)
+        :precondition 
+            (and 
+                (!=
+                    ?x
+                    ?y
+                )
+                (!=
+                    ?y
+                    ?z
+                )
+                (!=
+                    ?x
+                    ?z
+                )
+                (camino ?x ?y)
+                (camino ?y ?z)
+            )
+        :effect 
+            (and 
+                (camino ?x ?z)
             )
     )
     

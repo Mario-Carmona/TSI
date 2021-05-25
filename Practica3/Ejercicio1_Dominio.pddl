@@ -1,86 +1,59 @@
-;Header and description
-
 (define (domain ejercicio1)
-
-    ;remove requirements that are not needed
     (:requirements :strips :typing :adl)
-
-    (:types ;todo: enumerate types and their hierarchy here, e.g. car truck bus - vehicle
-        unidad edificio localizacion - object
+    (:types
+        unidad edificio localizacion recurso - object
     )
-
     (:constants
         VCE - unidad
-        centro_de_mando barracones - edificio
-        mineral gas - recurso
+        Centro_de_mando barracones - edificio
+        Mineral gas - recurso
     )
-
-    ; un-comment following line if constants are needed
-    ;(:constants )
-
-    (:predicates ;todo: define predicates here
-        (enEdi ?edi - edificio ?x - localizacion)
-        (enUni ?uni - unidad ?x - localizacion)
+    (:predicates
+        ; El edificio ?edi se encuentra en la localización ?x
+        (edificioEn ?edi - edificio ?x - localizacion)
+        ; La unidad ?uni se encuentra en la localización ?x
+        (unidadEn ?uni - unidad ?x - localizacion)
+        ; Existe un camino desde la localización ?x hasta la localización ?y
         (camino ?x - localizacion ?y - localizacion)
-        (construido ?edi - edificio)
-        (asignar ?recu - recurso ?x - localizacion)
-        (extrayendo ?vce - VCE ?recu - recurso)
+        ; Un depósito del recurso ?recu se encuentra en la localización ?x
+        (depositoEn ?recu - recurso ?x - localizacion)
+        ; La unidad ?vce está extrayendo el recurso ?recu
+        (extrayendo ?vce - unidad ?recu - recurso)
     )
 
-
-    (:functions ;todo: define numeric functions here
-    )
-
-    ;define actions here
+    ; Mover a una unidad entre dos localizaciones
     (:action navegar
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
-                (enUni ?uni ?locaOri)
+                ; La unidad se encuentra en la localización de origen
+                (unidadEn ?uni ?locaOri)
+                ; Existe un camino entre ambas localizaciones
+                (camino ?locaOri ?locaDest)
             )
         :effect 
             (and 
-                (enUni ?uni ?locaDest)
-                (not (enUni ?uni ?locaOri))
+                ; La unidad se encuentra en la localización de destino
+                (unidadEn ?uni ?locaDest)
+                ; La unidad no se encuentra en la localización de origen
+                (not (unidadEn ?uni ?locaOri))
             )
     )
 
+    ; Asignar un VCE a un nodo de recursos
     (:action asignar
-        :parameters (?uni - unidad ?locaRecu - localizacion ?tipo - recurso)
+        :parameters (?uni - unidad ?loca - localizacion ?recu - recurso)
         :precondition 
             (and 
-                (asignar ?tipo ?locaRecu)
-                (enUni ?uni ?locaRecu)
+                ; El nodo de recursos ?recu se encuentra en la localización de extracción ?loca
+                (depositoEn ?recu ?loca)
+                ; La unidad ?uni se encuentra en la localización de extracción ?loca
+                (unidadEn ?uni ?loca)
             )
         :effect 
             (and 
-                (extrayendo ?uni ?tipo)
+                ; La unidad ?uni está extrayendo recursos del nodo de recursos ?recu
+                (extrayendo ?uni ?recu)
             )
     )
-    
-    (:action crear_camino
-        :parameters (?x - localizacion ?y - localizacion ?z - localizacion)
-        :precondition 
-            (and 
-                (!=
-                    ?x
-                    ?y
-                )
-                (!=
-                    ?y
-                    ?z
-                )
-                (!=
-                    ?x
-                    ?z
-                )
-                (camino ?x ?y)
-                (camino ?y ?z)
-            )
-        :effect 
-            (and 
-                (camino ?x ?z)
-            )
-    )
-    
 )

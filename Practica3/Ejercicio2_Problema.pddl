@@ -1,17 +1,23 @@
-(define (problem ejercicio1) 
-    (:domain ejercicio1)
+(define (problem ejercicio2) 
+    (:domain ejercicio2)
     (:objects 
         ; Unidades
-        VCE1 - unidad
+        VCE1 VCE2 - VCE
 
         ; Edificios
-        CentroDeMando1 - edificio
+        CentroDeMando1 - centro_de_mando
+        Extractor1 - extractor
         
         ; Localizaciones
         LOC11 LOC12 LOC13 LOC14 - localizacion
         LOC21 LOC22 LOC23 LOC24 - localizacion
         LOC31 LOC32 LOC33 LOC34 - localizacion
+        
+        ; Recursos
+        mineral1 mineral2 - mineral
+        gas1 - gas
     )
+
     (:init
         ; Caminos
         ;   LOC11
@@ -52,20 +58,26 @@
         (camino LOC34 LOC33)
 
         ; Localización de edificios
-        (edificioEn CentroDeMando1 LOC11)
+        (enEdi CentroDeMando1 LOC11)
 
         ; Localización de unidades
-        (unidadEn VCE1 LOC11)
+        (enUni VCE1 LOC11)
+        (enUni VCE2 LOC11)
 
         ; Localización de recursos
-        (depositoEn Mineral LOC23)
-        (depositoEn Mineral LOC33)
+        (asignar mineral1 LOC23)
+        (asignar mineral2 LOC33)
+        (asignar gas1 LOC13)
     )
+
     (:goal 
         (and
-            (exists (?vce - unidad)
-                (extrayendo ?vce Mineral)
+            (exists (?vce - VCE ?mine - mineral)
+                (extrayendo ?vce ?mine)
             )
         )    
     )
+
+    ;un-comment the following line if metric is needed
+    ;(:metric minimize (???))
 )

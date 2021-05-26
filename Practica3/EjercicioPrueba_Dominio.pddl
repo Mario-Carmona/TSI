@@ -1,4 +1,4 @@
-(define (domain ejercicio1)
+(define (domain ejercicioPrueba)
     (:requirements :strips :typing :adl)
     (:types
         tipo_unidad tipo_edificio entidad localizacion recurso - object
@@ -6,7 +6,7 @@
     )
     (:constants
         VCE - tipo_unidad
-        Centro_de_mando Barracones - tipo_edificio
+        Centro_de_mando Barracones Extractor - tipo_edificio
         Mineral Gas_vespeno - recurso
     )
     (:predicates
@@ -28,6 +28,10 @@
         (extrayendo ?uni - unidad ?recu - recurso)
         ; La unidad ?uni está libre
         (libre ?uni - unidad)
+        ; El edificio ?edi requiere tener el recurso ?recu para poder ser construido
+        (edificioRequiere ?edi - edificio ?recu - recurso)
+        ; El edificio ?edi está construido
+        (construido ?edi - edificio)
     )
 
     ; Mover a una unidad entre dos localizaciones
@@ -51,26 +55,79 @@
 
     ; Asignar un VCE a un nodo de recursos
     (:action asignar
-        :parameters (?uni - unidad ?loca - localizacion ?recu - recurso)
+        :parameters (?uni - unidad ?loca - localizacion)
         :precondition 
             (and 
                 ; La unidad está libre
                 (libre ?uni)
                 ; La unidad es un VCE
                 (unidadEs ?uni VCE)
-                ; El nodo de recursos ?recu se encuentra en la localización de extracción ?loca
-                (depositoEn ?recu ?loca)
                 ; La unidad ?uni se encuentra en la localización de extracción ?loca
                 (unidadEn ?uni ?loca)
+                (or
+                    (depositoEn Mineral ?loca)
+                    (and
+                        (depositoEn Gas_vespeno ?loca)
+                        (exists (?edi - edificio) 
+                            (and
+                                (edificioEs ?edi Extractor)
+                                (edificioEn ?edi ?loca)
+                            )
+                        )
+                    )
+                )
             )
         :effect 
             (and 
-                ; La unidad ?uni está extrayendo recursos del nodo de recursos ?recu
-                (extrayendo ?uni ?recu)
+                (when (depositoEn Gas_vespeno ?loca) 
+                    ; La unidad ?uni está extrayendo gas vespeno del nodo
+                    (extrayendo ?uni Gas_vespeno)
+                )
+                (when (depositoEn Mineral ?loca) 
+                    ; La unidad ?uni está extrayendo mineral del nodo
+                    (extrayendo ?uni Mineral)
+                )
                 ; La unidad ?uni está asignada en un trabajo en la localización ?loca
                 (asignado ?uni ?loca)
                 ; La unidad ?uni no está libre
                 (not (libre ?uni))
             )
     )
+
+    (:action construir
+        :parameters (?uni - unidad ?edi - edificio ?loca - localizacion)
+        :precondition 
+            (and 
+                ; El edificio ?edi no está construido, sólo se puede construir una vez un objeto edificio
+                (not (construido ?edi))
+                ; La unidad está libre
+                (libre ?uni)
+                ; La unidad es un VCE
+                (unidadEs ?uni VCE)
+                ; La unidad ?uni se encuentra en la localización de construcción ?loca
+                (unidadEn ?uni ?loca)
+                (exists (?recu - recurso) 
+                    (and
+                        ; El edificio ?edi requiere el recurso ?recu para ser construido
+                        (edificioRequiere ?edi ?recu)
+                        (exists (?otraUni - unidad) 
+                            (and
+                                ; La otra unidad es un VCE
+                                (unidadEs ?otraUni VCE)
+                                ; La otra unidad está extrayendo el recurso que se requiere
+                                (extrayendo ?otraUni ?recu)
+                            )
+                        )
+                    )
+                )
+            )
+        :effect 
+            (and 
+                ; El edificio ?edi está construido en la localización ?loca
+                (edificioEn ?edi ?loca)
+                ; El edificio ?edi está construido
+                (construido ?edi)
+            )
+    )
+    
 )

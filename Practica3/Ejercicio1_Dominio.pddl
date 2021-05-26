@@ -5,8 +5,8 @@
     )
     (:constants
         VCE - unidad
-        Centro_de_mando barracones - edificio
-        Mineral gas - recurso
+        Centro_de_mando Barracones - edificio
+        Mineral Gas - recurso
     )
     (:predicates
         ; El edificio ?edi se encuentra en la localización ?x

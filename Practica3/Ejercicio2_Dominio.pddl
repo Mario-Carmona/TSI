@@ -1,113 +1,109 @@
-;Header and description
-
 (define (domain ejercicio2)
-
-    ;remove requirements that are not needed
     (:requirements :strips :typing :adl)
-
-    (:types ;todo: enumerate types and their hierarchy here, e.g. car truck bus - vehicle
-        unidad edificio localizacion - object
+    (:types
+        tipo_unidad tipo_edificio entidad localizacion recurso - object
+        unidad edificio - entidad
     )
-
     (:constants
-        VCE - unidad
-        centro_de_mando barracones extractor - edificio
-        mineral gas - recurso
+        VCE - tipo_unidad
+        Centro_de_mando Barracones Extractor - tipo_edificio
+        Mineral Gas - recurso
     )
-
-    ; un-comment following line if constants are needed
-    ;(:constants )
-
-    (:predicates ;todo: define predicates here
-        (enEdi ?edi - edificio ?x - localizacion)
-        (enUni ?uni - unidad ?x - localizacion)
+    (:predicates
+        (edificioEs ?edi - edificio ?tipo - tipo_edificio)
+        ; El edificio ?edi se encuentra en la localización ?x
+        (edificioEn ?edi - edificio ?x - localizacion)
+        (unidadEs ?uni - unidad ?tipo - tipo_unidad)
+        ; La unidad ?uni se encuentra en la localización ?x
+        (unidadEn ?uni - unidad ?x - localizacion)
+        ; Existe un camino desde la localización ?x hasta la localización ?y
         (camino ?x - localizacion ?y - localizacion)
-        (asignar ?recu - recurso ?x - localizacion)
+        ; Un depósito del recurso ?recu se encuentra en la localización ?x
+        (depositoEn ?recu - recurso ?x - localizacion)
+        ; La unidad ?vce está extrayendo el recurso ?recu
         (extrayendo ?uni - unidad ?recu - recurso)
-        (necesita ?edi - edificio ?recu - recurso)
         (libre ?uni - unidad)
-        (construyendo ?uni - unidad ?edi - edificio)
-        (genera ?edi - edificio ?recu - recurso)
+        (edificioRequiere ?edi - edificio ?recu - recurso)
+        (construido ?edi - edificio)
     )
 
-
-    (:functions ;todo: define numeric functions here
-    )
-
-    ;define actions here
+    ; Mover a una unidad entre dos localizaciones
     (:action navegar
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
-                (enUni ?uni ?locaOri)
+                ; La unidad se encuentra en la localización de origen
+                (unidadEn ?uni ?locaOri)
+                ; Existe un camino entre ambas localizaciones
+                (camino ?locaOri ?locaDest)
             )
         :effect 
             (and 
-                (enUni ?uni ?locaDest)
-                (not (enUni ?uni ?locaOri))
+                ; La unidad se encuentra en la localización de destino
+                (unidadEn ?uni ?locaDest)
+                ; La unidad no se encuentra en la localización de origen
+                (not (unidadEn ?uni ?locaOri))
             )
     )
 
+    ; Asignar un VCE a un nodo de recursos
     (:action asignar
-        :parameters (?uni - unidad ?locaRecu - localizacion ?tipo - recurso)
+        :parameters (?uni - unidad ?loca - localizacion)
         :precondition 
             (and 
-                (asignar ?tipo ?locaRecu)
-                (enUni ?uni ?locaRecu)
-            )
-        :effect 
-            (and 
-                (extrayendo ?uni ?tipo)
-            )
-    )
-    
-    (:action crear_camino
-        :parameters (?x - localizacion ?y - localizacion ?z - localizacion)
-        :precondition 
-            (and 
-                (!=
-                    ?x
-                    ?y
-                )
-                (!=
-                    ?y
-                    ?z
-                )
-                (!=
-                    ?x
-                    ?z
-                )
-                (camino ?x ?y)
-                (camino ?y ?z)
-            )
-        :effect 
-            (and 
-                (camino ?x ?z)
-            )
-    )
-    
-    (:action construir
-        :parameters (?uni - unidad ?edi - edificio ?loca - localizacion ?recu - recurso)
-        :precondition 
-            (and 
-                ;(forall (?x - recurso) 
-                ;    (when (and (genera ?edi ?x))
-                ;        (and
-                ;            (asignar ?rx ?loca)
-                ;        )
-                ;    )
-                ;)
-                (imply (genera ?edi ) (asignar gas ?loca))
+                (unidadEs ?uni VCE)
                 (libre ?uni)
-                (enUni ?uni ?loca)
-                (extrayendo VCE ?recu)
-                (necesita ?edi ?recu)
+                (unidadEn ?uni ?loca)
+                (or 
+                    (depositoEn Mineral ?loca)
+                    (and
+                        (depositoEn Gas ?loca)
+                        (exists (?edi - edificio) 
+                            (and
+                                (edificioEs ?edi Extractor)
+                                (edificioEn ?edi ?loca)
+                            )
+                        )
+                    )
+                )
             )
         :effect 
             (and 
-                (construyendo ?uni ?edi)
-                (enEdi ?edi ?loca)
+                (when (depositoEn Gas ?loca) 
+                    (extrayendo ?uni Gas)
+                )
+                (when (depositoEn Mineral ?loca) 
+                    (extrayendo ?uni Mineral)
+                )
                 (not (libre ?uni))
+            )
+    )
+
+    (:action construir
+        :parameters (?uni - unidad ?edi - edificio ?loca - localizacion)
+        :precondition 
+            (and 
+                (not (construido ?edi))
+                (unidadEs ?uni VCE)
+                (libre ?uni)
+                (unidadEn ?uni ?loca)
+
+                (exists (?recu - recurso)
+                    (and
+                        (edificioRequiere ?edi ?recu)
+                        (exists (?otroVCE - unidad)
+                            (and
+                                (extrayendo ?otroVCE ?recu)
+                            )
+                        )
+                    )
+                )
+                
+            )
+        :effect 
+            (and 
+                (edificioEn ?edi ?loca)
+                (construido ?edi)
             )
     )
 )

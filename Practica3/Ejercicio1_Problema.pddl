@@ -60,11 +60,20 @@
         ; Localización de recursos
         (depositoEn Mineral LOC23)
         (depositoEn Mineral LOC33)
+
+        ; Tipos de los edificios
+        (edificioEs CentroDeMando1 Centro_de_mando)
+
+        ; Tipos de las unidades
+        (unidadEs VCE1 VCE)
+
+        ; Unidades libres
+        (libre VCE1)
     )
     (:goal 
         (and
-            (exists (?vce - unidad)
-                (extrayendo ?vce Mineral)
+            (exists (?uni - unidad)
+                (extrayendo ?uni Mineral)
             )
         )    
     )

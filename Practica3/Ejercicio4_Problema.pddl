@@ -1,10 +1,13 @@
-(define (problem ejercicio3) 
-    (:domain ejercicio3)
+(define (problem ejercicio4) 
+    (:domain ejercicio4)
     (:objects 
         ; Unidades
         VCE1 - unidad
         VCE2 - unidad
         VCE3 - unidad
+        Marine1 - unidad
+        Marine2 - unidad
+        Segador1 - unidad
 
         ; Edificios
         CentroDeMando1 - edificio
@@ -60,8 +63,6 @@
 
         ; Localización de unidades
         (unidadEn VCE1 LOC11)
-        (unidadEn VCE2 LOC11)
-        (unidadEn VCE3 LOC11)
 
         ; Localización de recursos
         (depositoEn Mineral LOC23)
@@ -77,24 +78,37 @@
         (unidadEs VCE1 VCE)
         (unidadEs VCE2 VCE)
         (unidadEs VCE3 VCE)
+        (unidadEs Marine1 Marine)
+        (unidadEs Marine2 Marine)
+        (unidadEs Segador1 Segador)
 
         ; Unidades libres
         (libre VCE1)
-        (libre VCE2)
-        (libre VCE3)
 
         ; Edificios construidos
         (construido CentroDeMando1)
 
-        ; Recurso requerido para la construcción
+        ; Recurso requerido por un edificio para su construcción
         (edificioRequiere Extractor Mineral)
         (edificioRequiere Barracones Mineral)
         (edificioRequiere Barracones Gas_vespeno)
+
+        ; Recurso requerido por una unidad para su reclutamiento
+        (unidadRequiereRecu VCE Mineral)
+        (unidadRequiereRecu Marine Mineral)
+        (unidadRequiereRecu Segador Mineral)
+        (unidadRequiereRecu Segador Gas_vespeno)
+
+        ; Edificio requerido por una unidad para su reclutamiento
+        (unidadRequiereEdi VCE Centro_de_mando)
+        (unidadRequiereEdi Marine Barracones)
+        (unidadRequiereEdi Segador Barracones)
     )
     (:goal 
         (and
-            (construido Barracones1)
-            (edificioEn Barracones1 LOC32)
+            (unidadEn Marine1 LOC31)
+            (unidadEn Marine2 LOC24)
+            (unidadEn Segador1 LOC12)
         )
     )
 )

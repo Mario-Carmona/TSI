@@ -1,11 +1,11 @@
-(define (domain ejercicio3)
+(define (domain ejercicio4)
     (:requirements :strips :typing :adl)
     (:types
         tipo_unidad tipo_edificio entidad localizacion recurso - object
         unidad edificio - entidad
     )
     (:constants
-        VCE - tipo_unidad
+        VCE Marine Segador - tipo_unidad
         Centro_de_mando Barracones Extractor - tipo_edificio
         Mineral Gas_vespeno - recurso
     )
@@ -30,6 +30,10 @@
         (libre ?uni - unidad)
         ; El tipo de edificio ?tipoEdi requiere tener el recurso ?recu para poder ser construido
         (edificioRequiere ?tipoEdi - tipo_edificio ?recu - recurso)
+        ; El tipo de unidad ?tipoUni requiere tener el recurso ?recu para poder reclutarla
+        (unidadRequiereRecu ?tipoUni - tipo_unidad ?recu - recurso)
+        ; El tipo de unidad ?tipoUni requiere tener el tipo de edificio ?tipoEdi para poder reclutarla
+        (unidadRequiereEdi ?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio)
         ; El edificio ?edi está construido
         (construido ?edi - edificio)
     )
@@ -118,8 +122,6 @@
                                 ; El edificio ?edi requiere el recurso Mineral para ser construido
                                 (edificioRequiere ?tipoEdi Mineral)
                                 (not (edificioRequiere ?tipoEdi Gas_vespeno))
-                                ; Una de las otras unidades es un VCE
-                                (unidadEs ?otraUni1 VCE)
                                 ; Una de las unidades está extrayendo Mineral
                                 (extrayendo ?otraUni1 Mineral)
                             )
@@ -127,8 +129,6 @@
                                 ; El edificio ?edi requiere el recurso Gas Vespeno para ser construido
                                 (edificioRequiere ?tipoEdi Gas_vespeno)
                                 (not (edificioRequiere ?tipoEdi Mineral))
-                                ; Una de las otras unidades es un VCE
-                                (unidadEs ?otraUni1 VCE)
                                 ; Una de las unidades está extrayendo Gas Vespeno
                                 (extrayendo ?otraUni1 Gas_vespeno)
                             )
@@ -136,9 +136,6 @@
                                 ; El edificio ?edi requiere el recurso Mineral y Gas Vespeno para ser construido
                                 (edificioRequiere ?tipoEdi Mineral)
                                 (edificioRequiere ?tipoEdi Gas_vespeno)
-                                ; Ambas unidades son un VCE
-                                (unidadEs ?otraUni1 VCE)
-                                (unidadEs ?otraUni2 VCE)
                                 ; Una de las unidades está extrayendo Mineral
                                 (extrayendo ?otraUni1 Mineral)
                                 ; La otra unidad está extrayendo Gas Vespeno
@@ -154,6 +151,61 @@
                 (edificioEn ?edi ?loca)
                 ; El edificio ?edi está construido
                 (construido ?edi)
+            )
+    )
+    
+    (:action reclutar
+        :parameters (?edi - edificio ?uni - unidad ?loca - localizacion)
+        :precondition 
+            (and 
+                (forall (?locaAux - localizacion) 
+                    (not (unidadEn ?uni ?locaAux))
+                )
+                (exists (?otraUni1 - unidad ?otraUni2 - unidad ?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio)
+                    (and
+                        (unidadEs ?uni ?tipoUni)
+                        (edificioEs ?edi ?tipoEdi)
+                        (or
+                            (and
+                                ; La unidad ?uni requiere el recurso Mineral para ser reclutado
+                                (unidadRequiereRecu ?tipoUni Mineral)
+                                (not (unidadRequiereRecu ?tipoUni Gas_vespeno))
+                                ; Uno de los VCE está extrayendo Mineral
+                                (extrayendo ?otraUni1 Mineral)
+                            )
+                            (and
+                                ; La unidad ?uni requiere el recurso Gas Vespeno para ser reclutado
+                                (unidadRequiereRecu ?tipoUni Gas_vespeno)
+                                (not (unidadRequiereRecu ?tipoUni Mineral))
+                                ; Uno de los VCE está extrayendo Gas Vespeno
+                                (extrayendo ?otraUni1 Gas_vespeno)
+                            )
+                            (and
+                                ; La unidad ?uni requiere el recurso Mineral y Gas Vespeno para ser reclutado
+                                (unidadRequiereRecu ?tipoUni Gas_vespeno)
+                                (unidadRequiereRecu ?tipoUni Mineral)
+                                ; Uno de los VCE está extrayendo Mineral
+                                (extrayendo ?otraUni1 Mineral)
+                                ; Uno de los VCE está extrayendo Gas Vespeno
+                                (extrayendo ?otraUni2 Gas_vespeno)
+                            )
+                        )
+                        
+                    )
+                )
+                (exists (?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio) 
+                    (and
+                        (unidadEs ?uni ?tipoUni)
+                        (edificioEs ?edi ?tipoEdi)
+                        (unidadRequiereEdi ?tipoUni ?tipoEdi)
+                        (edificioEn ?edi ?loca)
+                    )
+                )
+            )
+        :effect 
+            (and 
+                (libre ?uni)
+                (unidadEn ?uni ?loca)
             )
     )
     

@@ -66,6 +66,9 @@ Ejer2:
 Ejer3:
 	./ff -o ../Ejercicio3_Dominio.pddl -f ../Ejercicio3_Problema.pddl -O -g 1 -h 1
 
+Ejer4:
+	./ff -o ../Ejercicio4_Dominio.pddl -f ../Ejercicio4_Problema.pddl -O -g 1 -h 1
+
 ########################
 
 ff: $(OBJECTS) $(PDDL_PARSER_OBJ)

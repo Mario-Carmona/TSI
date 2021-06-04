@@ -118,8 +118,6 @@
                                 ; El edificio ?edi requiere el recurso Mineral para ser construido
                                 (edificioRequiere ?tipoEdi Mineral)
                                 (not (edificioRequiere ?tipoEdi Gas_vespeno))
-                                ; Una de las otras unidades es un VCE
-                                (unidadEs ?otraUni1 VCE)
                                 ; Una de las unidades está extrayendo Mineral
                                 (extrayendo ?otraUni1 Mineral)
                             )
@@ -127,8 +125,6 @@
                                 ; El edificio ?edi requiere el recurso Gas Vespeno para ser construido
                                 (edificioRequiere ?tipoEdi Gas_vespeno)
                                 (not (edificioRequiere ?tipoEdi Mineral))
-                                ; Una de las otras unidades es un VCE
-                                (unidadEs ?otraUni1 VCE)
                                 ; Una de las unidades está extrayendo Gas Vespeno
                                 (extrayendo ?otraUni1 Gas_vespeno)
                             )
@@ -136,9 +132,6 @@
                                 ; El edificio ?edi requiere el recurso Mineral y Gas Vespeno para ser construido
                                 (edificioRequiere ?tipoEdi Mineral)
                                 (edificioRequiere ?tipoEdi Gas_vespeno)
-                                ; Ambas unidades son un VCE
-                                (unidadEs ?otraUni1 VCE)
-                                (unidadEs ?otraUni2 VCE)
                                 ; Una de las unidades está extrayendo Mineral
                                 (extrayendo ?otraUni1 Mineral)
                                 ; La otra unidad está extrayendo Gas Vespeno

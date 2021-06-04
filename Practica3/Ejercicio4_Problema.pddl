@@ -1,13 +1,15 @@
-(define (problem ejercicio2) 
-    (:domain ejercicio2)
+(define (problem ejercicio3) 
+    (:domain ejercicio3)
     (:objects 
         ; Unidades
         VCE1 - unidad
         VCE2 - unidad
+        VCE3 - unidad
 
         ; Edificios
         CentroDeMando1 - edificio
         Extractor1 - edificio
+        Barracones1 - edificio
         
         ; Localizaciones
         LOC11 LOC12 LOC13 LOC14 - localizacion
@@ -59,6 +61,7 @@
         ; Localización de unidades
         (unidadEn VCE1 LOC11)
         (unidadEn VCE2 LOC11)
+        (unidadEn VCE3 LOC11)
 
         ; Localización de recursos
         (depositoEn Mineral LOC23)
@@ -68,26 +71,30 @@
         ; Tipos de los edificios
         (edificioEs CentroDeMando1 Centro_de_mando)
         (edificioEs Extractor1 Extractor)
+        (edificioEs Barracones1 Barracones)
 
         ; Tipos de las unidades
         (unidadEs VCE1 VCE)
         (unidadEs VCE2 VCE)
+        (unidadEs VCE3 VCE)
 
         ; Unidades libres
         (libre VCE1)
         (libre VCE2)
+        (libre VCE3)
 
         ; Edificios construidos
         (construido CentroDeMando1)
 
         ; Recurso requerido para la construcción
-        (edificioRequiere Extractor1 Mineral)
+        (edificioRequiere Extractor Mineral)
+        (edificioRequiere Barracones Mineral)
+        (edificioRequiere Barracones Gas_vespeno)
     )
     (:goal 
         (and
-            (exists (?uni - unidad)
-                (extrayendo ?uni Gas_vespeno)
-            )
-        )    
+            (construido Barracones1)
+            (edificioEn Barracones1 LOC32)
+        )
     )
 )

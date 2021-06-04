@@ -61,7 +61,10 @@ Ejer1:
 	./ff -o ../Ejercicio1_Dominio.pddl -f ../Ejercicio1_Problema.pddl -O -g 1 -h 1
 	
 Ejer2:
-	./ff -o ../EjercicioPrueba_Dominio.pddl -f ../EjercicioPrueba_Problema.pddl -O -g 1 -h 1
+	./ff -o ../Ejercicio2_Dominio.pddl -f ../Ejercicio2_Problema.pddl -O -g 1 -h 1
+	
+Ejer3:
+	./ff -o ../Ejercicio3_Dominio.pddl -f ../Ejercicio3_Problema.pddl -O -g 1 -h 1
 
 ########################
 

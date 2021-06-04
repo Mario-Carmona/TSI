@@ -43,6 +43,7 @@ SOURCES 	= main.c \
 
 OBJECTS 	= $(SOURCES:.c=.o)
 
+
 ####### Implicit rules
 
 .SUFFIXES:
@@ -53,6 +54,16 @@ OBJECTS 	= $(SOURCES:.c=.o)
 
 ####### Build rules
 
+
+########################
+
+Ejer1:
+	./ff -o ../Ejercicio1_Dominio.pddl -f ../Ejercicio1_Problema.pddl -O -g 1 -h 1
+	
+Ejer2:
+	./ff -o ../EjercicioPrueba_Dominio.pddl -f ../EjercicioPrueba_Problema.pddl -O -g 1 -h 1
+
+########################
 
 ff: $(OBJECTS) $(PDDL_PARSER_OBJ)
 	$(CC) -o ff $(OBJECTS) $(PDDL_PARSER_OBJ) $(CFLAGS) $(LIBS)

@@ -1,5 +1,5 @@
-(define (problem ejercicio2) 
-    (:domain ejercicio2)
+(define (problem ejercicioPrueba) 
+    (:domain ejercicioPrueba)
     (:objects 
         ; Unidades
         VCE1 - unidad
@@ -54,26 +54,39 @@
         (camino LOC34 LOC33)
 
         ; Localización de edificios
-        (edificioEs CentroDeMando1 Centro_de_mando)
         (edificioEn CentroDeMando1 LOC11)
 
         ; Localización de unidades
-        (unidadEs VCE1 VCE)
         (unidadEn VCE1 LOC11)
-        (unidadEs VCE2 VCE)
         (unidadEn VCE2 LOC11)
 
         ; Localización de recursos
         (depositoEn Mineral LOC23)
         (depositoEn Mineral LOC33)
-        (depositoEn Gas LOC13)
+        (depositoEn Gas_vespeno LOC13)
 
+        ; Tipos de los edificios
+        (edificioEs CentroDeMando1 Centro_de_mando)
+        (edificioEs Extractor1 Extractor)
+
+        ; Tipos de las unidades
+        (unidadEs VCE1 VCE)
+        (unidadEs VCE2 VCE)
+
+        ; Unidades libres
+        (libre VCE1)
+        (libre VCE2)
+
+        ; Edificios construidos
+        (construido CentroDeMando1)
+
+        ; Recurso requerido para la construcción
         (edificioRequiere Extractor1 Mineral)
     )
     (:goal 
         (and
             (exists (?uni - unidad)
-                (extrayendo ?uni Gas)
+                (extrayendo ?uni Gas_vespeno)
             )
         )    
     )

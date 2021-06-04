@@ -1,13 +1,14 @@
-(define (domain ejercicio4)
+(define (domain ejercicio5)
     (:requirements :strips :typing :adl)
     (:types
-        tipo_unidad tipo_edificio entidad localizacion recurso - object
+        tipo_unidad tipo_edificio entidad investigacion localizacion recurso - object
         unidad edificio - entidad
     )
     (:constants
         VCE Marine Segador - tipo_unidad
-        Centro_de_mando Barracones Extractor - tipo_edificio
+        Centro_de_mando Barracones Extractor Bahia_de_ingenieria - tipo_edificio
         Mineral Gas_vespeno - recurso
+        Impulsar_segador - investigacion
     )
     (:predicates
         ; El edificio ?edi es un tipo de edificio ?tipo
@@ -34,6 +35,12 @@
         (unidadRequiereRecu ?tipoUni - tipo_unidad ?recu - recurso)
         ; El tipo de unidad ?tipoUni requiere tener el tipo de edificio ?tipoEdi para poder reclutarla
         (unidadRequiereEdi ?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio)
+        ; El tipo de unidad ?tipoUni requiere tener investigada la investigación ?inves
+        (unidadRequiereInves ?tipoUni - tipo_unidad ?inves - investigacion)
+        ; La investigación ?inves requiere tener el recurso ?recu para ser investigada
+        (investigacionRequiere ?inves - investigacion ?recu - recurso)
+        ; La investigación ?inves ha sido investigada
+        (investigada ?inves - investigacion)
         ; El edificio ?edi está construido
         (construido ?edi - edificio)
     )
@@ -158,10 +165,22 @@
         :parameters (?edi - edificio ?uni - unidad ?loca - localizacion)
         :precondition 
             (and 
+                (or
+                    (and
+                        (unidadEs ?uni Segador)
+                        (exists (?inves - investigacion) 
+                            (and 
+                                (unidadRequiereInves Segador ?inves)
+                                (investigada ?inves)
+                            )
+                        )
+                    )
+                    (not (unidadEs ?uni Segador))
+                )
                 (forall (?locaAux - localizacion) 
                     (not (unidadEn ?uni ?locaAux))
                 )
-                (exists (?otraUni1 - unidad ?otraUni2 - unidad ?tipoUni - tipo_unidad)
+                (exists (?otraUni1 - unidad ?otraUni2 - unidad ?tipoUni - tipo_unidad )
                     (and
                         (unidadEs ?uni ?tipoUni)
                         (or
@@ -205,6 +224,47 @@
             (and 
                 (libre ?uni)
                 (unidadEn ?uni ?loca)
+            )
+    )
+    
+    (:action investigar
+        :parameters (?edi - edificio ?inves - investigacion)
+        :precondition 
+            (and 
+                (not (investigada ?inves))
+                (edificioEs ?edi Bahia_de_ingenieria)
+                (construido ?edi)
+                (exists (?otraUni1 - unidad ?otraUni2 - unidad)
+                    (or
+                        (and
+                            ; La investigación ?inves requiere el recurso Mineral para ser investigada
+                            (investigacionRequiere ?inves Mineral)
+                            (not (investigacionRequiere ?inves Gas_vespeno))
+                            ; Uno de los VCE está extrayendo Mineral
+                            (extrayendo ?otraUni1 Mineral)
+                        )
+                        (and
+                            ; La investigación ?inves requiere el recurso Gas Vespeno para ser investigada
+                            (investigacionRequiere ?inves Gas_vespeno)
+                            (not (investigacionRequiere ?inves Mineral))
+                            ; Uno de los VCE está extrayendo Gas Vespeno
+                            (extrayendo ?otraUni1 Gas_vespeno)
+                        )
+                        (and
+                            ; La investigación ?inves requiere el recurso Mineral y Gas Vespeno para ser investigada
+                            (investigacionRequiere ?inves Gas_vespeno)
+                            (investigacionRequiere ?inves Mineral)
+                            ; Uno de los VCE está extrayendo Mineral
+                            (extrayendo ?otraUni1 Mineral)
+                            ; Uno de los VCE está extrayendo Gas Vespeno
+                            (extrayendo ?otraUni2 Gas_vespeno)
+                        )
+                    )
+                )
+            )
+        :effect 
+            (and 
+                (investigada ?inves)
             )
     )
     

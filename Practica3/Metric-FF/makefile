@@ -68,6 +68,9 @@ Ejer3:
 
 Ejer4:
 	./ff -o ../Ejercicio4_Dominio.pddl -f ../Ejercicio4_Problema.pddl -O -g 1 -h 1
+	
+Ejer5:
+	./ff -o ../Ejercicio5_Dominio.pddl -f ../Ejercicio5_Problema.pddl -O -g 1 -h 1
 
 ########################
 

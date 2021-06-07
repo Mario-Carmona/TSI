@@ -85,9 +85,7 @@
     )
     (:goal 
         (and
-            (exists (?uni - unidad)
-                (extrayendo ?uni Gas_vespeno)
-            )
+            (disponibleRecu Gas_vespeno)
         )    
     )
 )

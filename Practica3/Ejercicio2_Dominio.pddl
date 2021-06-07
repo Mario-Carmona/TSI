@@ -32,6 +32,10 @@
         (edificioRequiere ?edi - edificio ?recu - recurso)
         ; El edificio ?edi está construido
         (construido ?edi - edificio)
+        ; La localización ?loca está ocupada
+        (ocupadaLoca ?loca - localizacion)
+        ; Se dispone del recurso ?recu
+        (disponibleRecu ?recu - recurso)
     )
 
     ; Mover a una unidad entre dos localizaciones
@@ -80,12 +84,20 @@
         :effect 
             (and 
                 (when (depositoEn Gas_vespeno ?loca) 
-                    ; La unidad ?uni está extrayendo gas vespeno del nodo
-                    (extrayendo ?uni Gas_vespeno)
+                    (and
+                        ; La unidad ?uni está extrayendo gas vespeno del nodo
+                        (extrayendo ?uni Gas_vespeno)
+                        ; Se dispone del recurso Gas Vespeno
+                        (disponibleRecu Gas_vespeno)
+                    )
                 )
                 (when (depositoEn Mineral ?loca) 
-                    ; La unidad ?uni está extrayendo mineral del nodo
-                    (extrayendo ?uni Mineral)
+                    (and
+                        ; La unidad ?uni está extrayendo mineral del nodo
+                        (extrayendo ?uni Mineral)
+                        ; Se dispone del recurso Mineral
+                        (disponibleRecu Mineral)
+                    )
                 )
                 ; La unidad ?uni está asignada en un trabajo en la localización ?loca
                 (asignado ?uni ?loca)
@@ -100,23 +112,30 @@
             (and 
                 ; El edificio ?edi no está construido, sólo se puede construir una vez un objeto edificio
                 (not (construido ?edi))
+                ; La localización ?loca no está ocupada
+                (not (ocupadaLoca ?loca))
                 ; La unidad está libre
                 (libre ?uni)
                 ; La unidad es un VCE
                 (unidadEs ?uni VCE)
                 ; La unidad ?uni se encuentra en la localización de construcción ?loca
                 (unidadEn ?uni ?loca)
-                (exists (?recu - recurso ?otraUni - unidad) 
-                    (and
-                        ; El edificio ?edi requiere el recurso ?recu para ser construido
-                        (edificioRequiere ?edi ?recu)
+                (exists (?recu - recurso)
+                    (or
                         (and
-                            ; La otra unidad es un VCE
-                            (unidadEs ?otraUni VCE)
-                            ; La otra unidad está extrayendo el recurso que se requiere
-                            (extrayendo ?otraUni ?recu)
+                            ; El edificio ?edi requiere el recurso ?recu para ser construido
+                            (edificioRequiere ?edi ?recu)
+                            ; Se dispone del recurso ?recu
+                            (disponibleRecu ?recu)
                         )
                     )
+                )
+                (or
+                    (and
+                        (edificioEs ?edi Extractor)
+                        (depositoEn Gas_vespeno ?loca)
+                    )
+                    (not (edificioEs ?edi Extractor))
                 )
             )
         :effect 
@@ -125,6 +144,8 @@
                 (edificioEn ?edi ?loca)
                 ; El edificio ?edi está construido
                 (construido ?edi)
+                ; La localización ?loca está ocupada
+                (ocupadaLoca ?loca)
             )
     )
     

@@ -29,7 +29,7 @@
         ; La unidad ?uni está libre
         (libre ?uni - unidad)
         ; El edificio ?edi requiere tener el recurso ?recu para poder ser construido
-        (edificioRequiere ?edi - edificio ?recu - recurso)
+        (edificioRequiere ?tipoEdi - tipo_edificio ?recu - recurso)
         ; El edificio ?edi está construido
         (construido ?edi - edificio)
         ; La localización ?loca está ocupada
@@ -70,13 +70,10 @@
                 (unidadEn ?uni ?loca)
                 (or
                     (depositoEn Mineral ?loca)
-                    (and
-                        (depositoEn Gas_vespeno ?loca)
-                        (exists (?edi - edificio) 
-                            (and
-                                (edificioEs ?edi Extractor)
-                                (edificioEn ?edi ?loca)
-                            )
+                    (exists (?edi - edificio) 
+                        (and
+                            (edificioEs ?edi Extractor)
+                            (edificioEn ?edi ?loca)
                         )
                     )
                 )
@@ -120,11 +117,13 @@
                 (unidadEs ?uni VCE)
                 ; La unidad ?uni se encuentra en la localización de construcción ?loca
                 (unidadEn ?uni ?loca)
-                (exists (?recu - recurso)
+                (exists (?recu - recurso ?tipoEdi - tipo_edificio)
                     (or
                         (and
+                            ; El edificio ?edi es del tipo ?tipoEdi
+                            (edificioEs ?edi ?tipoEdi)
                             ; El edificio ?edi requiere el recurso ?recu para ser construido
-                            (edificioRequiere ?edi ?recu)
+                            (edificioRequiere ?tipoEdi ?recu)
                             ; Se dispone del recurso ?recu
                             (disponibleRecu ?recu)
                         )

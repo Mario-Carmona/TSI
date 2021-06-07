@@ -85,6 +85,7 @@
 
         ; Edificios construidos
         (construido CentroDeMando1)
+        (ocupadaLoca LOC11)
 
         ; Recurso requerido para la construcción
         (edificioRequiere Extractor Mineral)
@@ -93,7 +94,6 @@
     )
     (:goal 
         (and
-            (construido Barracones1)
             (edificioEn Barracones1 LOC32)
         )
     )

@@ -79,9 +79,10 @@
 
         ; Edificios construidos
         (construido CentroDeMando1)
+        (ocupadaLoca LOC11)
 
         ; Recurso requerido para la construcción
-        (edificioRequiere Extractor1 Mineral)
+        (edificioRequiere Extractor Mineral)
     )
     (:goal 
         (and

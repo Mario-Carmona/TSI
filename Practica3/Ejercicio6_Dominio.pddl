@@ -215,12 +215,8 @@
                     (numeroVCE ?loca)
                     0
                 )
-
-                (<=
-                    (+
-                        (cantidad ?recu)
-                        10
-                    )
+                (<
+                    (cantidad ?recu)
                     60
                 )
             )

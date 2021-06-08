@@ -23,10 +23,6 @@
         (camino ?locaOri - localizacion ?locaDest - localizacion)
         ; Un depósito del recurso ?recu se encuentra en la localización ?loca
         (depositoEn ?recu - recurso ?loca - localizacion)
-        ; La unidad ?uni está asignada en la localización ?loca
-        (asignado ?uni - unidad ?loca - localizacion)
-        ; La unidad ?uni está extrayendo el recurso ?recu
-        (extrayendo ?uni - unidad ?recu - recurso)
         ; La unidad ?uni está libre
         (libre ?uni - unidad)
         ; El tipo de edificio ?tipoEdi requiere tener el recurso ?recu para poder ser construido
@@ -47,6 +43,9 @@
         (ocupadaLoca ?loca - localizacion)
         ; Se dispone del recurso ?recu
         (disponibleRecu ?recu - recurso)
+        ; Se dispone del tipo de edificio ?tipoEdi en la localización ?loca
+        (dispone ?tipoEdi - tipo_edificio ?loca - localizacion)
+        ; Ha sido reclutada la unidad ?uni
         (reclutada ?uni - unidad)
     )
 
@@ -55,6 +54,8 @@
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
+                ; La unidad ?uni está libre
+                (libre ?uni)
                 ; La unidad se encuentra en la localización de origen
                 (unidadEn ?uni ?locaOri)
                 ; Existe un camino entre ambas localizaciones
@@ -81,35 +82,25 @@
                 ; La unidad ?uni se encuentra en la localización de extracción ?loca
                 (unidadEn ?uni ?loca)
                 (or
+                    ; Hay un deposito de Mineral en la localización ?loca
                     (depositoEn Mineral ?loca)
-                    (exists (?edi - edificio) 
-                        (and
-                            (edificioEs ?edi Extractor)
-                            (edificioEn ?edi ?loca)
-                        )
-                    )
+                    ; Se dispone de un Extractor en la localización ?loca, esto se lleva incluido
+                    ; que haya un deposito de Gas vespeno en la localización
+                    (dispone Extractor ?loca)
                 )
             )
         :effect 
             (and 
+                ; Cuando hay un depósito de Gas vespeno en la localización ?loca
                 (when (depositoEn Gas_vespeno ?loca) 
-                    (and
-                        ; La unidad ?uni está extrayendo gas vespeno del nodo
-                        (extrayendo ?uni Gas_vespeno)
-                        ; Se dispone del recurso Gas Vespeno
-                        (disponibleRecu Gas_vespeno)
-                    )
+                    ; Se dispone del recurso Gas Vespeno
+                    (disponibleRecu Gas_vespeno)
                 )
+                ; Cuando hay un depósito de Mineral en la localización ?loca
                 (when (depositoEn Mineral ?loca) 
-                    (and
-                        ; La unidad ?uni está extrayendo mineral del nodo
-                        (extrayendo ?uni Mineral)
-                        ; Se dispone del recurso Mineral
-                        (disponibleRecu Mineral)
-                    )
+                    ; Se dispone del recurso Mineral
+                    (disponibleRecu Mineral)
                 )
-                ; La unidad ?uni está asignada en un trabajo en la localización ?loca
-                (asignado ?uni ?loca)
                 ; La unidad ?uni no está libre
                 (not (libre ?uni))
             )
@@ -129,37 +120,50 @@
                 (unidadEs ?uni VCE)
                 ; La unidad ?uni se encuentra en la localización de construcción ?loca
                 (unidadEn ?uni ?loca)
+                (or
+                    (and
+                        ; El edificio ?edi es un Extractor
+                        (edificioEs ?edi Extractor)
+                        ; Hay un deposito de Gas vespeno en la localización ?loca
+                        (depositoEn Gas_vespeno ?loca)
+                    )
+                    ; El edificio ?edi no es un Extractor
+                    (not (edificioEs ?edi Extractor))
+                )
                 (exists (?tipoEdi - tipo_edificio) 
                     (and
                         ; El edificio ?edi es del tipo ?tipoEdi
                         (edificioEs ?edi ?tipoEdi)
                         (or
                             (and
+                                ; El tipo de edificio ?tipoEdi requiere el recurso Mineral para ser construido
                                 (edificioRequiere ?tipoEdi Mineral)
+                                ; El tipo de edificio ?tipoEdi no requiere el recurso Gas vespeno para ser construido
                                 (not (edificioRequiere ?tipoEdi Gas_vespeno))
+                                ; Se dispone del recurso Mineral
                                 (disponibleRecu Mineral)
                             )
                             (and
+                                ; El tipo de edificio ?tipoEdi requiere el recurso Gas vespeno para ser construido
                                 (edificioRequiere ?tipoEdi Gas_vespeno)
+                                ; El tipo de edificio ?tipoEdi no requiere el recurso Mineral para ser construido
                                 (not (edificioRequiere ?tipoEdi Mineral))
+                                ; Se dispone del recurso Gas vespeno
                                 (disponibleRecu Gas_vespeno)
                             )
                             (and
+                                ; El tipo de edificio ?tipoEdi requiere el recurso Mineral para ser construido
                                 (edificioRequiere ?tipoEdi Mineral)
+                                ; El tipo de edificio ?tipoEdi requiere el recurso Gas vespeno para ser construido
                                 (edificioRequiere ?tipoEdi Gas_vespeno)
+                                ; Se dispone del recurso Mineral
                                 (disponibleRecu Mineral)
+                                ; Se dispone del recurso Gas vespeno
                                 (disponibleRecu Gas_vespeno)
                             )
                         )
                     )
                     
-                )
-                (or
-                    (and
-                        (edificioEs ?edi Extractor)
-                        (depositoEn Gas_vespeno ?loca)
-                    )
-                    (not (edificioEs ?edi Extractor))
                 )
             )
         :effect 
@@ -170,56 +174,72 @@
                 (construido ?edi)
                 ; La localización ?loca está ocupada
                 (ocupadaLoca ?loca)
+                ; Cuando el edificio ?edi es un Barracón
+                (when (edificioEs ?edi Barracones) 
+                    ; Se dispone de un Barracón en la localización ?loca
+                    (dispone Barracones ?loca)
+                )
+                ; Cuando el edificio ?edi es un Extractor
+                (when (edificioEs ?edi Extractor) 
+                    ; Se dispone de un Extractor en la localización ?loca
+                    (dispone Extractor ?loca)
+                )
             )
     )
     
+    ; Reclutar una unidad
     (:action reclutar
         :parameters (?edi - edificio ?uni - unidad ?loca - localizacion)
         :precondition 
             (and 
+                ; La unidad ?uni todavía no ha sido reclutada
                 (not (reclutada ?uni))
-                (exists (?tipoUni - tipo_unidad)
+                (exists (?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio ?inves - investigacion)
                     (and
+                        ; La unidad ?uni es de tipo ?tipoUni
                         (unidadEs ?uni ?tipoUni)
                         (or
                             (and
                                 ; La unidad ?uni requiere el recurso Mineral para ser reclutado
                                 (unidadRequiereRecu ?tipoUni Mineral)
+                                ; La unidad ?uni no requiere el recurso Gas vespeno para ser reclutado
                                 (not (unidadRequiereRecu ?tipoUni Gas_vespeno))
+                                ; Se dispone del recurso Mineral
                                 (disponibleRecu Mineral)
                             )
                             (and
                                 ; La unidad ?uni requiere el recurso Gas Vespeno para ser reclutado
                                 (unidadRequiereRecu ?tipoUni Gas_vespeno)
+                                ; La unidad ?uni no requiere el recurso Mineral para ser reclutado
                                 (not (unidadRequiereRecu ?tipoUni Mineral))
+                                ; Se dispone del recurso Gas vespeno
                                 (disponibleRecu Gas_vespeno)
                             )
                             (and
-                                ; La unidad ?uni requiere el recurso Mineral y Gas Vespeno para ser reclutado
+                                ; La unidad ?uni requiere el recurso Gas Vespeno para ser reclutado
                                 (unidadRequiereRecu ?tipoUni Gas_vespeno)
+                                ; La unidad ?uni requiere el recurso Mineral para ser reclutado
                                 (unidadRequiereRecu ?tipoUni Mineral)
+                                ; Se dispone del recurso Mineral
                                 (disponibleRecu Mineral)
+                                ; Se dispone del recurso Gas vespeno
                                 (disponibleRecu Gas_vespeno)
                             )
                         )
-                    )
-                )
-                (exists (?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio) 
-                    (and
-                        (unidadEs ?uni ?tipoUni)
+                        ; El edificio ?edi es del tipo ?tipoEdi
                         (edificioEs ?edi ?tipoEdi)
+                        ; Las unidades de tipo ?tipoUni requieren del tipo de edificio ?tipoEdi para ser reclutadas
                         (unidadRequiereEdi ?tipoUni ?tipoEdi)
+                        ; El edificio ?edi se encuentra en la localización ?loca
                         (edificioEn ?edi ?loca)
-                    )
-                )
-                (exists (?tipoUni - tipo_unidad ?inves - investigacion) 
-                    (and
-                        (unidadEs ?uni ?tipoUni)
                         (or
                             (and
+                                ; El tipo de unidad ?tipoUni requiere la investigación ?inves para ser reclutada
                                 (unidadRequiereInves ?tipoUni ?inves)
+                                ; La investigación ?inves ha sido investigada
                                 (investigada ?inves)
                             )
+                            ; El tipo de unidad ?tipoUni no require de una investigación para ser reclutada
                             (not (unidadRequiereInves ?tipoUni ?inves))
                         )
                     )
@@ -227,45 +247,58 @@
             )
         :effect 
             (and 
+                ; La unidad ?uni está libre
                 (libre ?uni)
+                ; La unidad ?uni ya ha sido reclutada
                 (reclutada ?uni)
+                ; La unidad ?uni se encuentra en la localización ?loca
                 (unidadEn ?uni ?loca)
             )
     )
     
+    ; Investigar una investigación
     (:action investigar
         :parameters (?edi - edificio ?inves - investigacion)
         :precondition 
             (and 
+                ; La investigación ?inves no está investigada
                 (not (investigada ?inves))
+                ; El edificio ?edi es una Bahía de ingeniería
                 (edificioEs ?edi Bahia_de_ingenieria)
+                ; El edificio ?edi está construido
                 (construido ?edi)
                 (or
                     (and
                         ; La investigación ?inves requiere el recurso Mineral para ser investigada
                         (investigacionRequiere ?inves Mineral)
+                        ; La investigación ?inves no requiere el recurso Gas vespeno para ser investigada
                         (not (investigacionRequiere ?inves Gas_vespeno))
+                        ; Se dispone del recurso Mineral
                         (disponibleRecu Mineral)
                     )
                     (and
                         ; La investigación ?inves requiere el recurso Gas Vespeno para ser investigada
                         (investigacionRequiere ?inves Gas_vespeno)
+                        ; La investigación ?inves no requiere el recurso Mineral para ser investigada
                         (not (investigacionRequiere ?inves Mineral))
+                        ; Se dispone del recurso Gas vespeno
                         (disponibleRecu Gas_vespeno)
                     )
                     (and
-                        ; La investigación ?inves requiere el recurso Mineral y Gas Vespeno para ser investigada
+                        ; La investigación ?inves requiere el recurso Gas Vespeno para ser investigada
                         (investigacionRequiere ?inves Gas_vespeno)
+                        ; La investigación ?inves requiere el recurso Mineral para ser investigada
                         (investigacionRequiere ?inves Mineral)
+                        ; Se dispone del recurso Mineral
                         (disponibleRecu Mineral)
+                        ; Se dispone del recurso Gas vespeno
                         (disponibleRecu Gas_vespeno)
                     )
                 )
             )
         :effect 
-            (and 
-                (investigada ?inves)
-            )
+            ; La investigación ?inves ha sido investigada
+            (investigada ?inves)
     )
     
 )

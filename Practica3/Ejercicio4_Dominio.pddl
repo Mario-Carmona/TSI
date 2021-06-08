@@ -75,6 +75,7 @@
                 ; La unidad ?uni se encuentra en la localización de extracción ?loca
                 (unidadEn ?uni ?loca)
                 (or
+                    ; Hay un deposito de Mineral en la localización ?loca
                     (depositoEn Mineral ?loca)
                     ; Se dispone de un Extractor en la localización ?loca, esto se lleva incluido
                     ; que haya un deposito de Gas vespeno en la localización

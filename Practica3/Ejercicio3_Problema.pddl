@@ -93,8 +93,6 @@
         (edificioRequiere Barracones Gas_vespeno)
     )
     (:goal 
-        (and
-            (edificioEn Barracones1 LOC32)
-        )
+        (edificioEn Barracones1 LOC32)
     )
 )

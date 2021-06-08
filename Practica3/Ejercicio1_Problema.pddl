@@ -71,9 +71,6 @@
         (libre VCE1)
     )
     (:goal 
-        (and
-            ; Se dispone del recurso Mineral
-            (disponibleRecu Mineral)
-        )    
+        (disponibleRecu Mineral)  
     )
 )

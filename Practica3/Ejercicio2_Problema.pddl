@@ -85,8 +85,6 @@
         (edificioRequiere Extractor Mineral)
     )
     (:goal 
-        (and
-            (disponibleRecu Gas_vespeno)
-        )    
+        (disponibleRecu Gas_vespeno)   
     )
 )

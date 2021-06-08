@@ -60,6 +60,7 @@
 
         ; Localización de edificios
         (edificioEn CentroDeMando1 LOC11)
+        (ocupadaLoca LOC11)
 
         ; Localización de unidades
         (unidadEn VCE1 LOC11)
@@ -90,7 +91,6 @@
 
         ; Edificios construidos
         (construido CentroDeMando1)
-        (ocupadaLoca LOC11)
 
         ; Recurso requerido por un edificio para su construcción
         (edificioRequiere Extractor Mineral)
@@ -110,6 +110,7 @@
     )
     (:goal 
         (and
+            (edificioEn Barracones1 LOC32)
             (unidadEn Marine1 LOC31)
             (unidadEn Marine2 LOC24)
             (unidadEn Segador1 LOC12)

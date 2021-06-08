@@ -121,6 +121,7 @@
     )
     (:goal 
         (and
+            (edificioEn Barracones1 LOC32)
             (unidadEn Marine1 LOC31)
             (unidadEn Marine2 LOC24)
             (unidadEn Segador1 LOC12)

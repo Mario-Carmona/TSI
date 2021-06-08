@@ -60,6 +60,7 @@
 
         ; Localización de edificios
         (edificioEn CentroDeMando1 LOC11)
+        (ocupadaLoca LOC11)
 
         ; Localización de unidades
         (unidadEn VCE1 LOC11)
@@ -90,7 +91,6 @@
 
         ; Edificios construidos
         (construido CentroDeMando1)
-        (ocupadaLoca LOC11)
 
         ; Edificio requerido por una unidad para su reclutamiento
         (unidadRequiereEdi VCE Centro_de_mando)
@@ -121,8 +121,10 @@
         ; Cantidad inicial de gas vespeno
         (= (cantidad Gas_vespeno) 0)
 
+        ; Cantidad recolectada por cada VCE asignado a un depósito de recursos
         (= (cantidadPorVCE) 10)
 
+        ; Cantidad de VCE's asignados a una localización
         (= (numeroVCE LOC23) 0)
         (= (numeroVCE LOC33) 0)
         (= (numeroVCE LOC13) 0)

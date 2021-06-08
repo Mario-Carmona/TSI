@@ -1,5 +1,5 @@
-(define (problem ejercicio4) 
-    (:domain ejercicio4)
+(define (problem ejercicio6) 
+    (:domain ejercicio6)
     (:objects 
         ; Unidades
         VCE1 - unidad
@@ -85,19 +85,12 @@
         ; Unidades libres
         (libre VCE1)
 
+        ; Unidades reclutadas
+        (reclutada VCE1)
+
         ; Edificios construidos
         (construido CentroDeMando1)
-
-        ; Recurso requerido por un edificio para su construcción
-        (edificioRequiere Extractor Mineral)
-        (edificioRequiere Barracones Mineral)
-        (edificioRequiere Barracones Gas_vespeno)
-
-        ; Recurso requerido por una unidad para su reclutamiento
-        (unidadRequiereRecu VCE Mineral)
-        (unidadRequiereRecu Marine Mineral)
-        (unidadRequiereRecu Segador Mineral)
-        (unidadRequiereRecu Segador Gas_vespeno)
+        (ocupadaLoca LOC11)
 
         ; Edificio requerido por una unidad para su reclutamiento
         (unidadRequiereEdi VCE Centro_de_mando)
@@ -105,28 +98,35 @@
         (unidadRequiereEdi Segador Barracones)
 
         ; Cantidad de mineral requerida por una unidad para su reclutamiento
-        (= (unidadRequiereNum VCE Mineral) 10)
-        (= (unidadRequiereNum Marine Mineral) 20)
-        (= (unidadRequiereNum Segador Mineral) 30)
+        (= (unidadRequiereRecu VCE Mineral) 10)
+        (= (unidadRequiereRecu Marine Mineral) 20)
+        (= (unidadRequiereRecu Segador Mineral) 30)
 
         ; Cantidad de gas vespeno requerida por una unidad para su reclutamiento
-        (= (unidadRequiereNum VCE Gas_vespeno) 0)
-        (= (unidadRequiereNum Marine Gas_vespeno) 10)
-        (= (unidadRequiereNum Segador Gas_vespeno) 30)
+        (= (unidadRequiereRecu VCE Gas_vespeno) 0)
+        (= (unidadRequiereRecu Marine Gas_vespeno) 10)
+        (= (unidadRequiereRecu Segador Gas_vespeno) 30)
 
         ; Cantidad de mineral requerida por un edificio para su construcción
-        (= (edificioRequiereNum Barracones Mineral) 50)
-        (= (edificioRequiereNum Extractor Mineral) 33)
+        (= (edificioRequiereRecu Barracones Mineral) 50)
+        (= (edificioRequiereRecu Extractor Mineral) 33)
 
         ; Cantidad de gas vespeno requerida por un edificio para su construcción
-        (= (edificioRequiereNum Barracones Gas_vespeno) 20)
-        (= (edificioRequiereNum Extractor Gas_vespeno) 0)
+        (= (edificioRequiereRecu Barracones Gas_vespeno) 20)
+        (= (edificioRequiereRecu Extractor Gas_vespeno) 0)
 
         ; Cantidad inicial de mineral
         (= (cantidad Mineral) 0)
 
         ; Cantidad inicial de gas vespeno
         (= (cantidad Gas_vespeno) 0)
+
+        (= (cantidadPorVCE Mineral) 10)
+        (= (cantidadPorVCE Gas_vespeno) 10)
+
+        (= (numeroVCE LOC23) 0)
+        (= (numeroVCE LOC33) 0)
+        (= (numeroVCE LOC13) 0)
     )
     (:goal 
         (and

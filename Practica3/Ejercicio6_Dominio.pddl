@@ -1,4 +1,4 @@
-(define (domain ejercicio4)
+(define (domain ejercicio6)
     (:requirements :strips :typing :adl :fluents)
     (:types
         tipo_unidad tipo_edificio entidad localizacion recurso - object
@@ -24,23 +24,22 @@
         (depositoEn ?recu - recurso ?loca - localizacion)
         ; La unidad ?uni está asignada en la localización ?loca
         (asignado ?uni - unidad ?loca - localizacion)
-        ; La unidad ?uni está extrayendo el recurso ?recu
-        (extrayendo ?uni - unidad ?recu - recurso)
         ; La unidad ?uni está libre
         (libre ?uni - unidad)
-        ; El tipo de edificio ?tipoEdi requiere tener el recurso ?recu para poder ser construido
-        (edificioRequiere ?tipoEdi - tipo_edificio ?recu - recurso)
-        ; El tipo de unidad ?tipoUni requiere tener el recurso ?recu para poder reclutarla
-        (unidadRequiereRecu ?tipoUni - tipo_unidad ?recu - recurso)
         ; El tipo de unidad ?tipoUni requiere tener el tipo de edificio ?tipoEdi para poder reclutarla
         (unidadRequiereEdi ?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio)
         ; El edificio ?edi está construido
         (construido ?edi - edificio)
+        ; La localización ?loca está ocupada
+        (ocupadaLoca ?loca - localizacion)
+        (reclutada ?uni - unidad)
     )
     (:functions
         (cantidad ?recu - recurso)
-        (unidadRequiereNum ?tipoUni - tipo_unidad ?recu - recurso)
-        (edificioRequiereNum ?tipoEdi - tipo_edificio ?recu - recurso)
+        (cantidadPorVCE ?recu - recurso)
+        (numeroVCE ?loca - localizacion)
+        (unidadRequiereRecu ?tipoUni - tipo_unidad ?recu - recurso)
+        (edificioRequiereRecu ?tipoEdi - tipo_edificio ?recu - recurso)
     )
 
     ; Mover a una unidad entre dos localizaciones
@@ -75,27 +74,17 @@
                 (unidadEn ?uni ?loca)
                 (or
                     (depositoEn Mineral ?loca)
-                    (and
-                        (depositoEn Gas_vespeno ?loca)
-                        (exists (?edi - edificio) 
-                            (and
-                                (edificioEs ?edi Extractor)
-                                (edificioEn ?edi ?loca)
-                            )
+                    (exists (?edi - edificio) 
+                        (and
+                            (edificioEs ?edi Extractor)
+                            (edificioEn ?edi ?loca)
                         )
                     )
                 )
             )
         :effect 
             (and 
-                (when (depositoEn Gas_vespeno ?loca) 
-                    ; La unidad ?uni está extrayendo gas vespeno del nodo
-                    (extrayendo ?uni Gas_vespeno)
-                )
-                (when (depositoEn Mineral ?loca) 
-                    ; La unidad ?uni está extrayendo mineral del nodo
-                    (extrayendo ?uni Mineral)
-                )
+                (increase (numeroVCE ?loca) 1)
                 ; La unidad ?uni está asignada en un trabajo en la localización ?loca
                 (asignado ?uni ?loca)
                 ; La unidad ?uni no está libre
@@ -109,51 +98,34 @@
             (and 
                 ; El edificio ?edi no está construido, sólo se puede construir una vez un objeto edificio
                 (not (construido ?edi))
-                ; No debe haber ningún edificio construido en la localización ?loca
-                (forall (?ediAux - edificio) 
-                    (not (edificioEn ?ediAux ?loca))
-                )
+                ; La localización ?loca no está ocupada
+                (not (ocupadaLoca ?loca))
                 ; La unidad está libre
                 (libre ?uni)
                 ; La unidad es un VCE
                 (unidadEs ?uni VCE)
                 ; La unidad ?uni se encuentra en la localización de construcción ?loca
                 (unidadEn ?uni ?loca)
-                (exists (?otraUni1 - unidad ?otraUni2 - unidad ?tipoEdi - tipo_edificio)
+                (exists (?tipoEdi - tipo_edificio) 
                     (and
+                        ; El edificio ?edi es del tipo ?tipoEdi
                         (edificioEs ?edi ?tipoEdi)
-                        (or
-                            (and
-                                ; El edificio ?edi requiere el recurso Mineral para ser construido
-                                (edificioRequiere ?tipoEdi Mineral)
-                                (not (edificioRequiere ?tipoEdi Gas_vespeno))
-                                ; Una de las unidades está extrayendo Mineral
-                                (extrayendo ?otraUni1 Mineral)
-                            )
-                            (and
-                                ; El edificio ?edi requiere el recurso Gas Vespeno para ser construido
-                                (edificioRequiere ?tipoEdi Gas_vespeno)
-                                (not (edificioRequiere ?tipoEdi Mineral))
-                                ; Una de las unidades está extrayendo Gas Vespeno
-                                (extrayendo ?otraUni1 Gas_vespeno)
-                            )
-                            (and
-                                ; El edificio ?edi requiere el recurso Mineral y Gas Vespeno para ser construido
-                                (edificioRequiere ?tipoEdi Mineral)
-                                (edificioRequiere ?tipoEdi Gas_vespeno)
-                                ; Una de las unidades está extrayendo Mineral
-                                (extrayendo ?otraUni1 Mineral)
-                                ; La otra unidad está extrayendo Gas Vespeno
-                                (extrayendo ?otraUni2 Gas_vespeno)
-                            )
+                        (>=
+                            (cantidad Mineral)
+                            (edificioRequiereRecu ?tipoEdi Mineral)
                         )
-                        (forall (?recu - recurso) 
-                            (>=
-                                (cantidad ?recu)
-                                (edificioRequiereNum ?tipoEdi ?recu)
-                            )
+                        (>=
+                            (cantidad Gas_vespeno)
+                            (edificioRequiereRecu ?tipoEdi Gas_vespeno)
                         )
                     )
+                )
+                (or
+                    (and
+                        (edificioEs ?edi Extractor)
+                        (depositoEn Gas_vespeno ?loca)
+                    )
+                    (not (edificioEs ?edi Extractor))
                 )
             )
         :effect 
@@ -162,28 +134,19 @@
                 (edificioEn ?edi ?loca)
                 ; El edificio ?edi está construido
                 (construido ?edi)
+                ; La localización ?loca está ocupada
+                (ocupadaLoca ?loca)
+
                 (when (edificioEs ?edi Barracones) 
                     (and
-                        (decrease 
-                            (cantidad Mineral) 
-                            (edificioRequiereNum Barracones Mineral)
-                        )
-                        (decrease 
-                            (cantidad Gas_vespeno) 
-                            (edificioRequiereNum Barracones Gas_vespeno)
-                        )
-                    )  
+                        (decrease (cantidad Mineral) (edificioRequiereRecu Barracones Mineral))
+                        (decrease (cantidad Gas_vespeno) (edificioRequiereRecu Barracones Gas_vespeno))
+                    )
                 )
                 (when (edificioEs ?edi Extractor) 
                     (and
-                        (decrease 
-                            (cantidad Mineral) 
-                            (edificioRequiereNum Extractor Mineral)
-                        )
-                        (decrease 
-                            (cantidad Gas_vespeno) 
-                            (edificioRequiereNum Extractor Gas_vespeno)
-                        )
+                        (decrease (cantidad Mineral) (edificioRequiereRecu Extractor Mineral))
+                        (decrease (cantidad Gas_vespeno) (edificioRequiereRecu Extractor Gas_vespeno))
                     )
                 )
             )
@@ -193,42 +156,17 @@
         :parameters (?edi - edificio ?uni - unidad ?loca - localizacion)
         :precondition 
             (and 
-                (forall (?locaAux - localizacion) 
-                    (not (unidadEn ?uni ?locaAux))
-                )
-                (exists (?otraUni1 - unidad ?otraUni2 - unidad ?tipoUni - tipo_unidad)
+                (not (reclutada ?uni))
+                (exists (?tipoUni - tipo_unidad)
                     (and
                         (unidadEs ?uni ?tipoUni)
-                        (or
-                            (and
-                                ; La unidad ?uni requiere el recurso Mineral para ser reclutado
-                                (unidadRequiereRecu ?tipoUni Mineral)
-                                (not (unidadRequiereRecu ?tipoUni Gas_vespeno))
-                                ; Uno de los VCE está extrayendo Mineral
-                                (extrayendo ?otraUni1 Mineral)
-                            )
-                            (and
-                                ; La unidad ?uni requiere el recurso Gas Vespeno para ser reclutado
-                                (unidadRequiereRecu ?tipoUni Gas_vespeno)
-                                (not (unidadRequiereRecu ?tipoUni Mineral))
-                                ; Uno de los VCE está extrayendo Gas Vespeno
-                                (extrayendo ?otraUni1 Gas_vespeno)
-                            )
-                            (and
-                                ; La unidad ?uni requiere el recurso Mineral y Gas Vespeno para ser reclutado
-                                (unidadRequiereRecu ?tipoUni Gas_vespeno)
-                                (unidadRequiereRecu ?tipoUni Mineral)
-                                ; Uno de los VCE está extrayendo Mineral
-                                (extrayendo ?otraUni1 Mineral)
-                                ; Uno de los VCE está extrayendo Gas Vespeno
-                                (extrayendo ?otraUni2 Gas_vespeno)
-                            )
+                        (>=
+                            (cantidad Mineral)
+                            (unidadRequiereRecu ?tipoUni Mineral)
                         )
-                        (forall (?recu - recurso) 
-                            (>=
-                                (cantidad ?recu)
-                                (unidadRequiereNum ?tipoUni ?recu)
-                            )
+                        (>=
+                            (cantidad Gas_vespeno)
+                            (unidadRequiereRecu ?tipoUni Gas_vespeno)
                         )
                     )
                 )
@@ -244,42 +182,26 @@
         :effect 
             (and 
                 (libre ?uni)
+                (reclutada ?uni)
                 (unidadEn ?uni ?loca)
+
                 (when (unidadEs ?uni VCE) 
                     (and
-                        (decrease 
-                            (cantidad Mineral) 
-                            (unidadRequiereNum VCE Mineral)
-                        )
-                        (decrease 
-                            (cantidad Gas_vespeno) 
-                            (unidadRequiereNum VCE Gas_vespeno)
-                        )
+                        (decrease (cantidad Mineral) (unidadRequiereRecu VCE Mineral))
+                        (decrease (cantidad Gas_vespeno) (unidadRequiereRecu VCE Gas_vespeno))
                     )
                 )
                 (when (unidadEs ?uni Marine) 
                     (and
-                        (decrease 
-                            (cantidad Mineral) 
-                            (unidadRequiereNum Marine Mineral)
-                        )
-                        (decrease 
-                            (cantidad Gas_vespeno) 
-                            (unidadRequiereNum Marine Gas_vespeno)
-                        )
+                        (decrease (cantidad Mineral) (unidadRequiereRecu Marine Mineral))
+                        (decrease (cantidad Gas_vespeno) (unidadRequiereRecu Marine Gas_vespeno))
                     )
                 )
-                (when (unidadEs ?uni Segador)
+                (when (unidadEs ?uni Segador) 
                     (and
-                        (decrease 
-                            (cantidad Mineral) 
-                            (unidadRequiereNum Segador Mineral)
-                        )
-                        (decrease 
-                            (cantidad Gas_vespeno) 
-                            (unidadRequiereNum Segador Gas_vespeno)
-                        )
-                    ) 
+                        (decrease (cantidad Mineral) (unidadRequiereRecu Segador Mineral))
+                        (decrease (cantidad Gas_vespeno) (unidadRequiereRecu Segador Gas_vespeno))
+                    )
                 )
             )
     )
@@ -288,9 +210,12 @@
         :parameters (?recu - recurso ?loca - localizacion)
         :precondition 
             (and 
-                (exists (?uni - unidad) 
-                    (extrayendo ?uni ?recu)
+                (depositoEn ?recu ?loca)
+                (>
+                    (numeroVCE ?loca)
+                    0
                 )
+
                 (<=
                     (+
                         (cantidad ?recu)
@@ -301,9 +226,11 @@
             )
         :effect 
             (and
-                (increase 
-                    (cantidad ?recu) 
-                    10
+                (when (<= (+ (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE ?recu))) 60) 
+                    (increase (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE ?recu)))
+                )
+                (when (> (+ (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE ?recu))) 60) 
+                    (assign (cantidad ?recu) 60)
                 )
             )
     )

@@ -164,9 +164,6 @@
         )
     )
     (:metric minimize 
-        (+
-            (tiempoPlan)
-            0
-        )
+        (tiempoPlan)
     )
 )

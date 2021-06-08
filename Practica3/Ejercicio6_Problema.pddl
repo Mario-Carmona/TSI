@@ -121,8 +121,7 @@
         ; Cantidad inicial de gas vespeno
         (= (cantidad Gas_vespeno) 0)
 
-        (= (cantidadPorVCE Mineral) 10)
-        (= (cantidadPorVCE Gas_vespeno) 10)
+        (= (cantidadPorVCE) 10)
 
         (= (numeroVCE LOC23) 0)
         (= (numeroVCE LOC33) 0)

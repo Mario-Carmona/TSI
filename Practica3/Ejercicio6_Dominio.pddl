@@ -33,10 +33,11 @@
         ; La localización ?loca está ocupada
         (ocupadaLoca ?loca - localizacion)
         (reclutada ?uni - unidad)
+        (dispone ?tipoEdi - tipo_edificio ?loca - localizacion)
     )
     (:functions
         (cantidad ?recu - recurso)
-        (cantidadPorVCE ?recu - recurso)
+        (cantidadPorVCE)
         (numeroVCE ?loca - localizacion)
         (unidadRequiereRecu ?tipoUni - tipo_unidad ?recu - recurso)
         (edificioRequiereRecu ?tipoEdi - tipo_edificio ?recu - recurso)
@@ -47,6 +48,7 @@
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
+                (libre ?uni)
                 ; La unidad se encuentra en la localización de origen
                 (unidadEn ?uni ?locaOri)
                 ; Existe un camino entre ambas localizaciones
@@ -74,12 +76,7 @@
                 (unidadEn ?uni ?loca)
                 (or
                     (depositoEn Mineral ?loca)
-                    (exists (?edi - edificio) 
-                        (and
-                            (edificioEs ?edi Extractor)
-                            (edificioEn ?edi ?loca)
-                        )
-                    )
+                    (dispone Extractor ?loca)
                 )
             )
         :effect 
@@ -106,6 +103,13 @@
                 (unidadEs ?uni VCE)
                 ; La unidad ?uni se encuentra en la localización de construcción ?loca
                 (unidadEn ?uni ?loca)
+                (or
+                    (and
+                        (edificioEs ?edi Extractor)
+                        (depositoEn Gas_vespeno ?loca)
+                    )
+                    (not (edificioEs ?edi Extractor))
+                )
                 (exists (?tipoEdi - tipo_edificio) 
                     (and
                         ; El edificio ?edi es del tipo ?tipoEdi
@@ -119,13 +123,6 @@
                             (edificioRequiereRecu ?tipoEdi Gas_vespeno)
                         )
                     )
-                )
-                (or
-                    (and
-                        (edificioEs ?edi Extractor)
-                        (depositoEn Gas_vespeno ?loca)
-                    )
-                    (not (edificioEs ?edi Extractor))
                 )
             )
         :effect 
@@ -141,12 +138,14 @@
                     (and
                         (decrease (cantidad Mineral) (edificioRequiereRecu Barracones Mineral))
                         (decrease (cantidad Gas_vespeno) (edificioRequiereRecu Barracones Gas_vespeno))
+                        (dispone Barracones ?loca)
                     )
                 )
                 (when (edificioEs ?edi Extractor) 
                     (and
                         (decrease (cantidad Mineral) (edificioRequiereRecu Extractor Mineral))
                         (decrease (cantidad Gas_vespeno) (edificioRequiereRecu Extractor Gas_vespeno))
+                        (dispone Extractor ?loca)
                     )
                 )
             )
@@ -157,7 +156,7 @@
         :precondition 
             (and 
                 (not (reclutada ?uni))
-                (exists (?tipoUni - tipo_unidad)
+                (exists (?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio)
                     (and
                         (unidadEs ?uni ?tipoUni)
                         (>=
@@ -168,10 +167,6 @@
                             (cantidad Gas_vespeno)
                             (unidadRequiereRecu ?tipoUni Gas_vespeno)
                         )
-                    )
-                )
-                (exists (?tipoUni - tipo_unidad ?tipoEdi - tipo_edificio) 
-                    (and
                         (unidadEs ?uni ?tipoUni)
                         (edificioEs ?edi ?tipoEdi)
                         (unidadRequiereEdi ?tipoUni ?tipoEdi)
@@ -215,20 +210,16 @@
                     (numeroVCE ?loca)
                     0
                 )
-                (<
-                    (cantidad ?recu)
+                (<=
+                    (+
+                        (cantidad ?recu)
+                        (* (numeroVCE ?loca) (cantidadPorVCE))
+                    )
                     60
                 )
             )
         :effect 
-            (and
-                (when (<= (+ (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE ?recu))) 60) 
-                    (increase (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE ?recu)))
-                )
-                (when (> (+ (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE ?recu))) 60) 
-                    (assign (cantidad ?recu) 60)
-                )
-            )
+            (increase (cantidad ?recu) (* (numeroVCE ?loca) (cantidadPorVCE)))
     )
     
 )

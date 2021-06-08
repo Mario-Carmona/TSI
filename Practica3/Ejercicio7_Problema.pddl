@@ -60,6 +60,7 @@
 
         ; Localización de edificios
         (edificioEn CentroDeMando1 LOC11)
+        (ocupadaLoca LOC11)
 
         ; Localización de unidades
         (unidadEn VCE1 LOC11)
@@ -90,7 +91,6 @@
 
         ; Edificios construidos
         (construido CentroDeMando1)
-        (ocupadaLoca LOC11)
 
         ; Edificio requerido por una unidad para su reclutamiento
         (unidadRequiereEdi VCE Centro_de_mando)
@@ -121,28 +121,37 @@
         ; Cantidad inicial de gas vespeno
         (= (cantidad Gas_vespeno) 0)
 
+        ; Cantidad recolectada por cada VCE asignado a un depósito de recursos
         (= (cantidadPorVCE) 10)
 
+        ; Cantidad de VCE's asignados a una localización
         (= (numeroVCE LOC23) 0)
         (= (numeroVCE LOC33) 0)
         (= (numeroVCE LOC13) 0)
 
+        ; Tiempo inicial del plan
         (= (tiempoPlan) 0)
 
+        ; Tiempo gastado en asignar un VCE a un nodo de recursos
         (= (costeAsignar) 0)
 
+        ; Tiempo gastado en recolectar recursos
         (= (costeRecolectar) 10)
 
+        ; Distancia entre dos localizaciones
         (= (distanciaEntreLoca) 10)
 
+        ; Velocidad de los tipos de unidad
         (= (velocidad VCE) 1)
         (= (velocidad Marine) 5)
         (= (velocidad Segador) 10)
 
+        ; Tiempo gastado en reclutar los tipos de unidad
         (= (costeReclutar VCE) 12)
         (= (costeReclutar Marine) 18)
         (= (costeReclutar Segador) 32)
 
+        ; Tiempo gastado en construir los tipos de edificio
         (= (costeConstruir Barracones) 46)
         (= (costeConstruir Extractor) 21)
     )

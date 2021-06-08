@@ -53,6 +53,7 @@
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
+                ; La unidad ?uni está libre
                 (libre ?uni)
                 ; La unidad se encuentra en la localización de origen
                 (unidadEn ?uni ?locaOri)

@@ -85,8 +85,12 @@
         ; Unidades libres
         (libre VCE1)
 
+        ; Unidades reclutadas
+        (reclutada VCE1)
+
         ; Edificios construidos
         (construido CentroDeMando1)
+        (ocupadaLoca LOC11)
 
         ; Recurso requerido por un edificio para su construcción
         (edificioRequiere Extractor Mineral)

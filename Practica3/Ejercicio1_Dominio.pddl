@@ -22,10 +22,8 @@
         (camino ?locaOri - localizacion ?locaDest - localizacion)
         ; Un depósito del recurso ?recu se encuentra en la localización ?loca
         (depositoEn ?recu - recurso ?loca - localizacion)
-        ; La unidad ?uni está asignada en la localización ?loca
-        (asignado ?uni - unidad ?loca - localizacion)
-        ; La unidad ?uni está extrayendo el recurso ?recu
-        (extrayendo ?uni - unidad ?recu - recurso)
+        ; Se dispone del recurso ?recu
+        (disponibleRecu ?recu - recurso)
         ; La unidad ?uni está libre
         (libre ?uni - unidad)
     )
@@ -35,16 +33,18 @@
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
-                ; La unidad se encuentra en la localización de origen
+                ; La unidad ?uni está libre
+                (libre ?uni)
+                ; La unidad ?uni se encuentra en la localización de origen ?locaOri
                 (unidadEn ?uni ?locaOri)
                 ; Existe un camino entre ambas localizaciones
                 (camino ?locaOri ?locaDest)
             )
         :effect 
             (and 
-                ; La unidad se encuentra en la localización de destino
+                ; La unidad ?uni se encuentra en la localización de destino ?locaDest
                 (unidadEn ?uni ?locaDest)
-                ; La unidad no se encuentra en la localización de origen
+                ; La unidad ?uni no se encuentra en la localización de origen ?locaOri
                 (not (unidadEn ?uni ?locaOri))
             )
     )
@@ -65,10 +65,16 @@
             )
         :effect 
             (and 
-                ; La unidad ?uni está extrayendo recursos del nodo de recursos ?recu
-                (extrayendo ?uni ?recu)
-                ; La unidad ?uni está asignada en un trabajo en la localización ?loca
-                (asignado ?uni ?loca)
+                ; Cuando hay un depósito de Gas vespeno en la localización ?loca
+                (when (depositoEn Gas_vespeno ?loca) 
+                    ; Se dispone del recurso Gas Vespeno
+                    (disponibleRecu Gas_vespeno)
+                )
+                ; Cuando hay un depósito de Mineral en la localización ?loca
+                (when (depositoEn Mineral ?loca) 
+                    ; Se dispone del recurso Mineral
+                    (disponibleRecu Mineral)
+                )
                 ; La unidad ?uni no está libre
                 (not (libre ?uni))
             )

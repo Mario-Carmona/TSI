@@ -57,6 +57,7 @@
 
         ; Localización de edificios
         (edificioEn CentroDeMando1 LOC11)
+        (ocupadaLoca LOC11)
 
         ; Localización de unidades
         (unidadEn VCE1 LOC11)
@@ -85,7 +86,6 @@
 
         ; Edificios construidos
         (construido CentroDeMando1)
-        (ocupadaLoca LOC11)
 
         ; Recurso requerido para la construcción
         (edificioRequiere Extractor Mineral)

@@ -22,10 +22,6 @@
         (camino ?locaOri - localizacion ?locaDest - localizacion)
         ; Un depósito del recurso ?recu se encuentra en la localización ?loca
         (depositoEn ?recu - recurso ?loca - localizacion)
-        ; La unidad ?uni está asignada en la localización ?loca
-        (asignado ?uni - unidad ?loca - localizacion)
-        ; La unidad ?uni está extrayendo el recurso ?recu
-        (extrayendo ?uni - unidad ?recu - recurso)
         ; La unidad ?uni está libre
         (libre ?uni - unidad)
         ; El edificio ?edi requiere tener el recurso ?recu para poder ser construido
@@ -36,6 +32,8 @@
         (ocupadaLoca ?loca - localizacion)
         ; Se dispone del recurso ?recu
         (disponibleRecu ?recu - recurso)
+        ; Se dispone del tipo de edificio ?tipoEdi en la localización ?loca
+        (dispone ?tipoEdi - tipo_edificio ?loca - localizacion)
     )
 
     ; Mover a una unidad entre dos localizaciones
@@ -43,16 +41,18 @@
         :parameters (?uni - unidad ?locaOri - localizacion ?locaDest - localizacion)
         :precondition 
             (and 
-                ; La unidad se encuentra en la localización de origen
+                ; La unidad ?uni está libre
+                (libre ?uni)
+                ; La unidad ?uni se encuentra en la localización de origen ?locaOri
                 (unidadEn ?uni ?locaOri)
                 ; Existe un camino entre ambas localizaciones
                 (camino ?locaOri ?locaDest)
             )
         :effect 
             (and 
-                ; La unidad se encuentra en la localización de destino
+                ; La unidad ?uni se encuentra en la localización de destino ?locaDest
                 (unidadEn ?uni ?locaDest)
-                ; La unidad no se encuentra en la localización de origen
+                ; La unidad ?uni no se encuentra en la localización de origen ?locaOri
                 (not (unidadEn ?uni ?locaOri))
             )
     )
@@ -69,40 +69,31 @@
                 ; La unidad ?uni se encuentra en la localización de extracción ?loca
                 (unidadEn ?uni ?loca)
                 (or
+                    ; Hay un deposito de Mineral en la localización ?loca
                     (depositoEn Mineral ?loca)
-                    (exists (?edi - edificio) 
-                        (and
-                            (edificioEs ?edi Extractor)
-                            (edificioEn ?edi ?loca)
-                        )
-                    )
+                    ; Se dispone de un Extractor en la localización ?loca, esto se lleva incluido
+                    ; que haya un deposito de Gas vespeno en la localización
+                    (dispone Extractor ?loca)
                 )
             )
         :effect 
             (and 
+                ; Cuando hay un depósito de Gas vespeno en la localización ?loca
                 (when (depositoEn Gas_vespeno ?loca) 
-                    (and
-                        ; La unidad ?uni está extrayendo gas vespeno del nodo
-                        (extrayendo ?uni Gas_vespeno)
-                        ; Se dispone del recurso Gas Vespeno
-                        (disponibleRecu Gas_vespeno)
-                    )
+                    ; Se dispone del recurso Gas Vespeno
+                    (disponibleRecu Gas_vespeno)
                 )
+                ; Cuando hay un depósito de Mineral en la localización ?loca
                 (when (depositoEn Mineral ?loca) 
-                    (and
-                        ; La unidad ?uni está extrayendo mineral del nodo
-                        (extrayendo ?uni Mineral)
-                        ; Se dispone del recurso Mineral
-                        (disponibleRecu Mineral)
-                    )
+                    ; Se dispone del recurso Mineral
+                    (disponibleRecu Mineral)
                 )
-                ; La unidad ?uni está asignada en un trabajo en la localización ?loca
-                (asignado ?uni ?loca)
                 ; La unidad ?uni no está libre
                 (not (libre ?uni))
             )
     )
 
+    ; Construir un edificio con la ayuda de un VCE
     (:action construir
         :parameters (?uni - unidad ?edi - edificio ?loca - localizacion)
         :precondition 
@@ -117,24 +108,25 @@
                 (unidadEs ?uni VCE)
                 ; La unidad ?uni se encuentra en la localización de construcción ?loca
                 (unidadEn ?uni ?loca)
-                (exists (?recu - recurso ?tipoEdi - tipo_edificio)
-                    (or
-                        (and
-                            ; El edificio ?edi es del tipo ?tipoEdi
-                            (edificioEs ?edi ?tipoEdi)
-                            ; El edificio ?edi requiere el recurso ?recu para ser construido
-                            (edificioRequiere ?tipoEdi ?recu)
-                            ; Se dispone del recurso ?recu
-                            (disponibleRecu ?recu)
-                        )
-                    )
-                )
                 (or
                     (and
+                        ; El edificio ?edi es un Extractor
                         (edificioEs ?edi Extractor)
+                        ; Hay un deposito de Gas vespeno en la localización ?loca
                         (depositoEn Gas_vespeno ?loca)
                     )
+                    ; El edificio ?edi no es un Extractor
                     (not (edificioEs ?edi Extractor))
+                )
+                (exists (?recu - recurso ?tipoEdi - tipo_edificio)
+                    (and
+                        ; El edificio ?edi es del tipo ?tipoEdi
+                        (edificioEs ?edi ?tipoEdi)
+                        ; El tipo de edificio ?tipoEdi requiere el recurso ?recu para ser construido
+                        (edificioRequiere ?tipoEdi ?recu)
+                        ; Se dispone del recurso ?recu
+                        (disponibleRecu ?recu)
+                    )
                 )
             )
         :effect 
@@ -145,6 +137,16 @@
                 (construido ?edi)
                 ; La localización ?loca está ocupada
                 (ocupadaLoca ?loca)
+                ; Cuando el edificio ?edi es un Barracón
+                (when (edificioEs ?edi Barracones) 
+                    ; Se dispone de un Barracón en la localización ?loca
+                    (dispone Barracones ?loca)
+                )
+                ; Cuando el edificio ?edi es un Extractor
+                (when (edificioEs ?edi Extractor) 
+                    ; Se dispone de un Extractor en la localización ?loca
+                    (dispone Extractor ?loca)
+                )
             )
     )
     

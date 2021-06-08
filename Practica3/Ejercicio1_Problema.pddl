@@ -72,9 +72,8 @@
     )
     (:goal 
         (and
-            (exists (?uni - unidad)
-                (extrayendo ?uni Mineral)
-            )
+            ; Se dispone del recurso Mineral
+            (disponibleRecu Mineral)
         )    
     )
 )

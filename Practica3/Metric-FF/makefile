@@ -58,25 +58,25 @@ OBJECTS 	= $(SOURCES:.c=.o)
 ########################
 
 Ejer1:
-	./ff -o ../Ejercicio1_Dominio.pddl -f ../Ejercicio1_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio1.pddl -f ../problema1.pddl -O -g 1 -h 1
 	
 Ejer2:
-	./ff -o ../Ejercicio2_Dominio.pddl -f ../Ejercicio2_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio2.pddl -f ../problema2.pddl -O -g 1 -h 1
 	
 Ejer3:
-	./ff -o ../Ejercicio3_Dominio.pddl -f ../Ejercicio3_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio3.pddl -f ../problema3.pddl -O -g 1 -h 1
 
 Ejer4:
-	./ff -o ../Ejercicio4_Dominio.pddl -f ../Ejercicio4_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio4.pddl -f ../problema4.pddl -O -g 1 -h 1
 	
 Ejer5:
-	./ff -o ../Ejercicio5_Dominio.pddl -f ../Ejercicio5_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio5.pddl -f ../problema5.pddl -O -g 1 -h 1
 	
 Ejer6:
-	./ff -o ../Ejercicio6_Dominio.pddl -f ../Ejercicio6_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio6.pddl -f ../problema6.pddl -O -g 1 -h 1
 	
 Ejer7:
-	./ff -o ../Ejercicio7_Dominio.pddl -f ../Ejercicio7_Problema.pddl -O -g 1 -h 1
+	./ff -o ../dominio7.pddl -f ../problema7.pddl -O -g 1 -h 1
 
 ########################
 

@@ -22,8 +22,6 @@ El agente debe tener los siguientes comportamientos:
 
 Para el cálculo del camino hacia una gema se hace uso del algoritmo A*.
 
-
-
 | Visualización del nivel |
 | :---: |
 | ![Nivel1](./Practica1/Gif/comp_delib_simple.gif) |
@@ -33,6 +31,10 @@ Para el cálculo del camino hacia una gema se hace uso del algoritmo A*.
 Para implementarlo de hace uso del deliberativo simple añadiendo la elección de la gema a la que dirigirse en cada momento.
 
 Para elegir la gema se hace uso del algoritmo greedy, usando como heurística la distancia Manhattan.
+
+| Visualización del nivel |
+| :---: |
+| ![Nivel2](./Practica1/Gif/comp_delib_compu.gif) |
 
 ### Comportamiento reactivo
 
@@ -44,8 +46,15 @@ Al inicio del nivel se desprende el calor de los muros. Y en cada movimiento se 
 
 Cuanto más cerca del muro como del enemigo más calor se desprende. Por cada casilla que se aleja del centro se disminuye en una unidad el calor.
 
+| Visualización del nivel |
+| :---: |
+| Simple | Compuesto |
+| ![Nivel3](./Practica1/Gif/comp_reac_simple.gif) | ![Nivel4](./Practica1/Gif/comp_reac_compu.gif) |
+
 ### Comportamiento reactivo-deliberativo
 
 Para este comportamiento se combinan los comportamiento deliberativos y reactivos compuestos, con pequeñas modificaciones para unir ambos comportamientos.
 
-
+| Visualización del nivel |
+| :---: |
+| ![Nivel5](./Practica1/Gif/comp_reac_delib.gif) |

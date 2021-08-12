@@ -22,6 +22,12 @@ El agente debe tener los siguientes comportamientos:
 
 Para el cálculo del camino hacia una gema se hace uso del algoritmo A*.
 
+
+
+| Visualización del nivel |
+| :---: |
+| ![Nivel1](./Practica1/Gif/comp_delib_simple.gif) |
+
 ### Comportamiento deliberativo compuesto
 
 Para implementarlo de hace uso del deliberativo simple añadiendo la elección de la gema a la que dirigirse en cada momento.

@@ -46,10 +46,13 @@ Al inicio del nivel se desprende el calor de los muros. Y en cada movimiento se 
 
 Cuanto más cerca del muro como del enemigo más calor se desprende. Por cada casilla que se aleja del centro se disminuye en una unidad el calor.
 
-| Visualización del nivel |
+| Visualización del nivel simple |
 | :---: |
-| Simple | Compuesto |
-| ![Nivel3](./Practica1/Gif/comp_reac_simple.gif) | ![Nivel4](./Practica1/Gif/comp_reac_compu.gif) |
+| ![Nivel3](./Practica1/Gif/comp_reac_simple.gif) |
+
+| Visualización del nivel compuesto |
+| :---: |
+| ![Nivel4](./Practica1/Gif/comp_reac_compu.gif) |
 
 ### Comportamiento reactivo-deliberativo
 

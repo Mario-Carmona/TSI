@@ -24,7 +24,7 @@ Para el cálculo del camino hacia una gema se hace uso del algoritmo A*.
 
 | Visualización del nivel |
 | :---: |
-| ![Nivel1](./Practica1/Gif/comp_delib_simple.gif) |
+| ![Nivel1](./Gif/comp_delib_simple.gif) |
 
 ### Comportamiento deliberativo compuesto
 
@@ -34,7 +34,7 @@ Para elegir la gema se hace uso del algoritmo greedy, usando como heurística la
 
 | Visualización del nivel |
 | :---: |
-| ![Nivel2](./Practica1/Gif/comp_delib_compu.gif) |
+| ![Nivel2](./Gif/comp_delib_compu.gif) |
 
 ### Comportamiento reactivo
 
@@ -48,11 +48,11 @@ Cuanto más cerca del muro como del enemigo más calor se desprende. Por cada ca
 
 | Visualización del nivel simple |
 | :---: |
-| ![Nivel3](./Practica1/Gif/comp_reac_simple.gif) |
+| ![Nivel3](./Gif/comp_reac_simple.gif) |
 
 | Visualización del nivel compuesto |
 | :---: |
-| ![Nivel4](./Practica1/Gif/comp_reac_compu.gif) |
+| ![Nivel4](./Gif/comp_reac_compu.gif) |
 
 ### Comportamiento reactivo-deliberativo
 
@@ -60,4 +60,4 @@ Para este comportamiento se combinan los comportamiento deliberativos y reactivo
 
 | Visualización del nivel |
 | :---: |
-| ![Nivel5](./Practica1/Gif/comp_reac_delib.gif) |
+| ![Nivel5](./Gif/comp_reac_delib.gif) |

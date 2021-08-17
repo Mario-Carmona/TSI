@@ -46,6 +46,8 @@ Al inicio del nivel se desprende el calor de los muros. Y en cada movimiento se 
 
 Cuanto más cerca del muro como del enemigo más calor se desprende. Por cada casilla que se aleja del centro se disminuye en una unidad el calor.
 
+El agente irá a la zona con mayor área cuadrada sin calor, para priorizar la mejores zonas para esquivar a los enemigos.
+
 | Visualización del nivel simple |
 | :---: |
 | ![Nivel3](./Gif/comp_reac_simple.gif) |

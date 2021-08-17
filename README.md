@@ -18,7 +18,7 @@ El agente debe tener los siguientes comportamientos:
 - **Comportamiento reactivo compuesto**: mantenerse alejado de dos enemigos durante un tiempo predeterminado (2000 ticks).
 - **Comportamiento reactivo-deliberativo**: búsqueda de 9 gemas (en un mapa con un número superior o igual de gemas), evitando el enemigo presente en el mapa y, una vez se tengan todas, alcanzar el portal dentro de los límites de tiempo predeterminados (2000 ticks).
 
-## Práctica 2: Satisfacción de restricciones
+## [Práctica 2: Satisfacción de restricciones](./Practica2)
 
 Un problema de satisfacción de restricciones (CSP) se suele expresar como una tupla con tres elementos:
 
@@ -43,7 +43,7 @@ En esta práctica usaremos MiniZinc como lenguaje de modelado de restricciones.
 
 Todas las soluciones de los ejecicios son correctas y completas, es decir, todos los ejercicios dan todas las posibles soluciones correctas.
 
-## Práctica 3: Planificación Clásica (PDDL)
+## [Práctica 3: Planificación Clásica (PDDL)](./Practica3)
 
 Las técnicas de planificación requieren dos elementos:
 
